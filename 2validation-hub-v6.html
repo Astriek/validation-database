@@ -1,0 +1,907 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Profile Intelligence System v5</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+
+:root[data-theme="dark"]{--bg:#0F0F1E;--surface:#1A1A2E;--s2:#16213E;--border:rgba(0,217,255,0.1);--text:#E8E8FF;--text-secondary:#B0B0D0;--muted:#A0A0C0;--faint:#0F1628;--gold:#00D9FF;--gold-bg:rgba(0,217,255,0.1);--gold-br:rgba(0,217,255,0.3);--c1:#FFB800;--c2:#00D9FF;--c3:#00D97F;--c4:#FF9F1C;--us:#EF4444;--in:#F97316;--sg:#EC4899;--uk:#3B82F6;--all:#10B981;--ivy:#A78BFA;--oxb:#38BDF8;--shadow:0 8px 32px rgba(0,0,0,0.3);}
+
+:root[data-theme="light"]{--bg:#FFFFFF;--surface:#F8F9FA;--s2:#F3F4F6;--border:rgba(59,130,246,0.1);--text:#1F2937;--text-secondary:#374151;--muted:#4B5563;--faint:#17023e;--gold:#3B82F6;--gold-bg:rgba(59,130,246,0.1);--gold-br:rgba(59,130,246,0.3);--c1:#F59E0B;--c2:#3B82F6;--c3:#10B981;--c4:#F97316;--us:#DC2626;--in:#EA580C;--sg:#DB2777;--uk:#1E40AF;--all:#047857;--ivy:#7C3AED;--oxb:#0284C7;--shadow:0 1px 3px rgba(0,0,0,0.1);}
+
+:root{--bg:#0F0F1E;--surface:#1A1A2E;--s2:#16213E;--border:rgba(0,217,255,0.1);--text:#E8E8FF;--text-secondary:#B0B0D0;--muted:#A0A0C0;--faint:#0F1628;--gold:#00D9FF;--gold-bg:rgba(0,217,255,0.1);--gold-br:rgba(0,217,255,0.3);--c1:#FFB800;--c2:#00D9FF;--c3:#00D97F;--c4:#FF9F1C;--us:#EF4444;--in:#F97316;--sg:#EC4899;--uk:#3B82F6;--all:#10B981;--ivy:#A78BFA;--oxb:#38BDF8;--shadow:0 8px 32px rgba(0,0,0,0.3);}
+
+body{background:var(--bg);font-family:'Cormorant Garamond',Georgia,serif;color:var(--text);min-height:100vh;overflow-x:hidden;transition:background 0.3s ease, color 0.3s ease}
+button{cursor:pointer;font-family:'JetBrains Mono',monospace}
+input,select{font-family:'Cormorant Garamond',Georgia,serif}
+a{color:var(--c2);text-decoration:none}a:hover{text-decoration:underline}
+/* TABS */
+.tab-bar{display:flex;background:var(--surface);border-bottom:1px solid var(--border);padding:0 28px;position:sticky;top:0;z-index:100;overflow-x:auto;justify-content:space-between;align-items:center}
+.tab-buttons{display:flex;gap:0}
+.tab-btn{padding:13px 16px;background:none;border:none;color:var(--muted);font-size:11px;letter-spacing:.08em;text-transform:uppercase;border-bottom:2px solid transparent;transition:all .18s;white-space:nowrap}
+.tab-btn:hover{color:var(--text)}.tab-btn.active{color:var(--gold);border-bottom-color:var(--gold)}
+.tab-content{display:none}.tab-content.active{display:block}
+.theme-toggle{background:var(--surface);border:1px solid var(--border);color:var(--text);padding:8px 12px;border-radius:6px;cursor:pointer;font-size:18px;transition:all 0.3s ease;margin-right:20px;display:flex;align-items:center;justify-content:center}
+.theme-toggle:hover{border-color:var(--gold);background:var(--gold-bg);color:var(--gold);transform:scale(1.1)}
+/* HEADER */
+.hdr{padding:24px 28px 0;border-bottom:1px solid var(--border)}
+.hdr-inner{max-width:1440px;margin:0 auto}
+.eyebrow{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.3em;color:var(--gold);text-transform:uppercase;margin-bottom:6px}
+.hdr-title{font-size:26px;font-weight:400;color:var(--text);letter-spacing:-.02em}
+.hdr-title em{font-style:italic;color:var(--gold)}
+.hdr-sub{font-size:12px;color:var(--muted);margin-top:4px}
+.legend-row{display:flex;gap:6px;flex-wrap:wrap;margin-top:12px;padding-bottom:16px}
+.lpill{display:flex;align-items:center;gap:5px;padding:3px 8px;border-radius:3px;font-size:10px}
+/* COUNTRY STRIP */
+.cstrip{padding:14px 28px;border-bottom:1px solid var(--border);background:rgba(0,0,0,.15)}
+.cs-lbl{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.3em;color:var(--muted);text-transform:uppercase;margin-bottom:8px}
+.cs-row{display:flex;gap:7px;flex-wrap:wrap}
+.cbtn{display:flex;align-items:center;gap:7px;padding:7px 12px;border-radius:5px;border:1px solid var(--border);background:var(--surface);color:var(--muted);transition:all .18s;cursor:pointer}
+.cbtn:hover{border-color:rgba(255,255,255,.15);color:var(--text)}
+.cbtn .flag{font-size:15px}.cbtn .cname{font-size:12px;font-family:'Cormorant Garamond',serif;font-weight:600}
+.cbtn .ctag{font-size:7.5px;opacity:.55;font-family:'JetBrains Mono',monospace}
+.adot{width:5px;height:5px;border-radius:50%;display:none}
+.cbtn.active .adot{display:block}
+.cbtn.c-all.active{border-color:var(--all);background:rgba(109,221,181,.07);color:var(--all)}.cbtn.c-all .adot{background:var(--all)}
+.cbtn.c-us.active{border-color:var(--us);background:rgba(232,91,91,.07);color:var(--us)}.cbtn.c-us .adot{background:var(--us)}
+.cbtn.c-in.active{border-color:var(--in);background:rgba(255,153,51,.07);color:var(--in)}.cbtn.c-in .adot{background:var(--in)}
+.cbtn.c-sg.active{border-color:var(--sg);background:rgba(224,52,52,.07);color:var(--sg)}.cbtn.c-sg .adot{background:var(--sg)}
+.cbtn.c-uk.active{border-color:var(--uk);background:rgba(74,127,203,.07);color:var(--uk)}.cbtn.c-uk .adot{background:var(--uk)}
+/* BODY */
+.body-wrap{max-width:1440px;margin:0 auto;padding:18px 28px 60px}
+.search-wrap{margin-bottom:12px;position:relative}
+.search-wrap::before{content:'⌕';position:absolute;left:11px;top:50%;transform:translateY(-50%);color:var(--muted);font-size:15px;pointer-events:none}
+.sbox{width:100%;background:var(--surface);border:1px solid var(--border);border-radius:5px;padding:8px 11px 8px 32px;color:var(--text);font-size:14px;outline:none;transition:border-color .14s}
+.sbox:focus{border-color:var(--gold-br)}.sbox::placeholder{color:var(--muted)}
+.filters{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-bottom:16px}
+.fdiv{width:1px;height:14px;background:var(--border)}
+.fb{padding:4px 8px;border-radius:3px;border:1px solid var(--border);background:transparent;color:var(--muted);font-size:8.5px;letter-spacing:.05em;text-transform:uppercase;transition:all .13s}
+.fb:hover{color:var(--text);border-color:rgba(255,255,255,.14)}
+.fb.active{color:var(--gold);border-color:var(--gold-br);background:var(--gold-bg)}
+.fb.tComp.active{color:#F472B6;border-color:rgba(244,114,182,.3);background:rgba(244,114,182,.05)}
+.fb.tJour.active{color:#34D399;border-color:rgba(52,211,153,.3);background:rgba(52,211,153,.05)}
+.fb.tProg.active{color:#FBBF24;border-color:rgba(251,191,36,.3);background:rgba(251,191,36,.05)}
+.fb.tOrg.active{color:#A78BFA;border-color:rgba(167,139,250,.3);background:rgba(167,139,250,.05)}
+.fb.tPlat.active{color:#60A5FA;border-color:rgba(96,165,250,.3);background:rgba(96,165,250,.05)}
+.fb.g1.active{color:var(--c1);border-color:rgba(212,175,55,.38);background:rgba(212,175,55,.06)}
+.fb.g2.active{color:var(--c2);border-color:rgba(126,184,212,.3);background:rgba(126,184,212,.05)}
+.fb.g3.active{color:var(--c3);border-color:rgba(109,221,181,.28);background:rgba(109,221,181,.04)}
+.fb.sivy.active{color:var(--ivy);border-color:rgba(192,132,252,.3);background:rgba(192,132,252,.05)}
+.fb.soxb.active{color:var(--oxb);border-color:rgba(56,189,248,.3);background:rgba(56,189,248,.05)}
+.fb.gna.active{color:#60A5FA;border-color:rgba(96,165,250,.3);background:rgba(96,165,250,.05)}
+.layout{display:flex;gap:16px}
+.sidebar{width:150px;flex-shrink:0;position:sticky;top:50px;max-height:calc(100vh-70px);overflow-y:auto}
+.sidebar::-webkit-scrollbar{width:2px}.sidebar::-webkit-scrollbar-thumb{background:var(--border)}
+.sb-lbl{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.25em;color:var(--muted);text-transform:uppercase;margin-bottom:6px}
+.fld-btn{display:flex;justify-content:space-between;align-items:center;width:100%;text-align:left;padding:5px 6px;border-radius:3px;margin-bottom:1px;border:1px solid transparent;background:transparent;color:var(--text-secondary);font-size:11px;font-family:'Cormorant Garamond',serif;transition:all .1s;gap:4px}
+.fld-btn:hover{color:var(--text)}.fld-btn.active{border-color:var(--gold-br);background:var(--gold-bg);color:var(--gold)}
+.fld-cnt{font-size:8.5px;font-family:'JetBrains Mono',monospace;color:var(--muted);flex-shrink:0}.fld-btn.active .fld-cnt{color:var(--gold)}
+.main{flex:1;min-width:0}
+.rbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;flex-wrap:wrap;gap:5px}
+.rmeta{font-family:'JetBrains Mono',monospace;font-size:9.5px;color:var(--muted)}
+.cpills{display:flex;gap:5px}
+.cpill{font-family:'JetBrains Mono',monospace;font-size:8.5px;padding:2px 7px;border-radius:10px;border:1px solid}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:9px}
+.nores{text-align:center;padding:50px;color:var(--muted);font-size:14px}
+/* CARDS */
+.card{
+  background:linear-gradient(135deg,var(--surface) 0%,var(--s2) 100%);
+  border:1px solid var(--border);
+  border-radius:12px;
+  padding:16px;
+  cursor:pointer;
+  position:relative;
+  overflow:hidden;
+  transition:all 0.25s ease;
+  box-shadow:var(--shadow);
+  }
+  .card:hover{
+    border-color:var(--gold);
+    box-shadow:0 12px 40px rgba(0,0,0,0.35);
+    transform:translateY(-3px);
+    }
+.card.open{border-color:var(--gold);box-shadow:0 16px 56px rgba(0,217,255,0.3)}
+.gstripe{position:absolute;top:0;left:0;bottom:0;width:3px}
+.ctop{display:flex;justify-content:space-between;align-items:flex-start;gap:6px;margin-bottom:6px}
+.cname{
+  font-size:15px;
+  color:var(--text);
+  line-height:1.45;
+  font-weight:700;
+}
+.cbadges{display:flex;flex-direction:column;align-items:flex-end;gap:2px;flex-shrink:0}
+.gbadge{font-size:7px;font-weight:500;letter-spacing:.1em;font-family:'JetBrains Mono',monospace;padding:2px 5px;border-radius:2px;white-space:nowrap}
+.nbadge{font-size:6.5px;color:#60A5FA;font-family:'JetBrains Mono',monospace;padding:1px 4px;border:1px solid rgba(96,165,250,.25);border-radius:2px}
+.cmeta{display:flex;gap:4px;margin-bottom:7px;flex-wrap:wrap;align-items:center}
+.ttag{font-size:8px;padding:2px 5px;border-radius:2px;background:rgba(255,255,255,.03);font-family:'JetBrains Mono',monospace;letter-spacing:.03em}
+.ftag{font-size:8px;padding:2px 5px;border-radius:2px;background:var(--gold-bg);color:var(--text-secondary);font-family:'JetBrains Mono',monospace}
+.sbadge{font-size:7px;padding:2px 5px;border-radius:2px;font-family:'JetBrains Mono',monospace;color:var(--text-secondary)}
+.cdesc{
+  font-size:13px;
+  color:var(--text-secondary);
+  line-height:1.55;
+  letter-spacing:0.2px;
+}
+.cfoot{margin-top:6px;display:flex;justify-content:space-between;align-items:center}
+.exhint{padding:0;background:none;border:none;font-size:9px;color:var(--muted);font-family:'JetBrains Mono',monospace}
+.anote{padding:7px 9px;background:var(--gold-bg);border:1px solid var(--gold-br);border-radius:3px;margin:8px 0 6px;font-size:11px;color:var(--text-secondary);line-height:1.55}
+.anlbl{font-size:7px;letter-spacing:.18em;color:var(--gold);font-family:'JetBrains Mono',monospace;display:block;margin-bottom:3px}
+.lbtn{display:inline-flex;align-items:center;gap:4px;font-size:9px;color:#60A5FA;padding:4px 8px;border:1px solid rgba(96,165,250,.18);border-radius:3px;background:rgba(96,165,250,.04);font-family:'JetBrains Mono',monospace;text-decoration:none;transition:background .13s}
+.lbtn:hover{background:rgba(96,165,250,.1);text-decoration:none}
+/* AO INSIGHT */
+.ao-row{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin:8px 0}
+.ao-block{background:rgba(255,255,255,.02);border:1px solid var(--border);border-radius:4px;padding:7px 9px}
+.ao-lbl{font-family:'JetBrains Mono',monospace;font-size:7px;letter-spacing:.15em;color:var(--muted);text-transform:uppercase;margin-bottom:4px}
+.ao-stars{display:flex;gap:2px;margin-bottom:3px}
+.ao-star{width:9px;height:9px;border-radius:1px}
+.ao-sat{display:flex;align-items:center;gap:5px}
+.ao-sat-bar{flex:1;height:4px;border-radius:2px;background:var(--border);overflow:hidden}
+.ao-sat-fill{height:100%;border-radius:2px}
+.ao-sat-lbl{font-family:'JetBrains Mono',monospace;font-size:8px;white-space:nowrap}
+/* JOURNAL TAB */
+.jrn-wrap{max-width:1440px;margin:0 auto;padding:18px 28px 60px}
+.jrn-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:9px}
+.jcard{background:var(--surface);border:1px solid var(--border);border-radius:7px;padding:13px 14px 10px;cursor:pointer;position:relative;overflow:hidden;transition:border-color .13s,box-shadow .13s}
+.jcard:hover{border-color:rgba(255,255,255,.1);box-shadow:0 3px 16px rgba(0,0,0,.25)}
+.jcard.open{border-color:rgba(212,175,55,.2)}
+.jstripe{position:absolute;top:0;left:0;bottom:0;width:3px}
+.jtop{display:flex;justify-content:space-between;gap:7px;margin-bottom:6px}
+.jname{
+  font-size:13px;
+  color:var(--text);
+  line-height:1.35;
+  font-weight:600;
+}
+.jabbr{font-family:'JetBrains Mono',monospace;font-size:8.5px;color:var(--gold);letter-spacing:.1em;margin-top:2px}
+.jbadges{display:flex;flex-direction:column;align-items:flex-end;gap:2px;flex-shrink:0}
+.jbadge{font-size:7px;font-family:'JetBrains Mono',monospace;padding:2px 5px;border-radius:2px;white-space:nowrap}
+.jmeta{display:flex;gap:4px;margin-bottom:8px;flex-wrap:wrap}
+.jtag{font-size:8px;padding:2px 5px;border-radius:2px;background:rgba(255,255,255,.025);color:#5A5248;font-family:'JetBrains Mono',monospace}
+.jstats{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:8px;padding:7px 8px;background:rgba(255,255,255,.02);border-radius:4px;border:1px solid var(--border)}
+.jstat{display:flex;flex-direction:column;gap:1px}
+.jstat-lbl{font-family:'JetBrains Mono',monospace;font-size:7px;color:var(--muted);letter-spacing:.05em;text-transform:uppercase}
+.jstat-val{font-size:11.5px;color:#C0B89A;font-family:'JetBrains Mono',monospace}
+.jdesc{font-size:12px;color:#8A8070;line-height:1.55}
+.jnote{padding:7px 9px;background:rgba(212,175,55,.04);border:1px solid rgba(212,175,55,.12);border-radius:3px;margin:8px 0 6px;font-size:11px;color:#C0B080;line-height:1.55}
+.jnlbl{font-size:7px;letter-spacing:.18em;color:var(--gold);font-family:'JetBrains Mono',monospace;display:block;margin-bottom:3px}
+.jfoot{margin-top:6px;display:flex;justify-content:space-between;align-items:center}
+.tier-band{margin-bottom:28px}
+.tier-hdr{display:flex;align-items:center;gap:10px;margin-bottom:12px;padding-bottom:7px;border-bottom:1px solid var(--border)}
+.tier-title{font-size:18px;color:#F0EAD8}
+.tier-desc{font-size:11.5px;color:var(--muted);font-style:italic;flex:1}
+.tier-cnt{font-family:'JetBrains Mono',monospace;font-size:9.5px;color:var(--muted)}
+/* AO INSIGHT in journals */
+.j-ao-row{display:grid;grid-template-columns:1fr 1fr;gap:5px;margin:7px 0}
+.j-ao-block{background:rgba(255,255,255,.02);border:1px solid var(--border);border-radius:3px;padding:6px 8px}
+/* PROFILE BUILDER */
+.pb-wrap{max-width:960px;margin:0 auto;padding:24px 28px 60px}
+.pb-sec{margin-bottom:26px}
+.pb-title{font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:.28em;color:var(--gold);text-transform:uppercase;margin-bottom:12px}
+.pb-row{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:10px}
+.pb-field{display:flex;flex-direction:column;gap:4px}
+.pb-label{font-size:10.5px;color:var(--muted);font-family:'JetBrains Mono',monospace}
+.pb-select{background:var(--surface);border:1px solid var(--border);border-radius:4px;padding:7px 9px;color:var(--text);font-size:13px;outline:none;min-width:130px;-webkit-appearance:none}
+.pb-chips{display:flex;gap:5px;flex-wrap:wrap}
+.pb-chip{padding:6px 11px;border-radius:4px;border:1px solid var(--border);background:var(--surface);color:var(--muted);font-size:11.5px;font-family:'Cormorant Garamond',serif;transition:all .13s;cursor:pointer}
+.pb-chip:hover{border-color:rgba(255,255,255,.15);color:var(--text)}
+.pb-chip.active{border-color:var(--gold-br);background:var(--gold-bg);color:var(--gold)}
+.pb-go{padding:9px 24px;background:var(--gold);color:#09090D;border:none;border-radius:4px;font-size:11px;letter-spacing:.1em;text-transform:uppercase;font-weight:500;margin-top:4px}
+.pb-go:hover{opacity:.87}
+.rm-year{margin-bottom:22px}
+.rm-year-hdr{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+.rm-grade{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--gold);background:var(--gold-bg);border:1px solid var(--gold-br);padding:3px 9px;border-radius:3px}
+.rm-desc{font-size:12.5px;color:var(--muted);font-style:italic}
+.rm-cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:7px}
+.rm-card{background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:11px 12px;position:relative;overflow:hidden}
+.rm-stripe{position:absolute;top:0;left:0;bottom:0;width:3px}
+.rm-name{
+  font-size:13px;
+  color:var(--text);
+  margin-bottom:4px;
+  line-height:1.35;
+  font-weight:600;
+}
+.rm-why{font-size:11px;color:#7A7060;line-height:1.5;margin-bottom:7px}
+.rm-meta{display:flex;gap:4px;flex-wrap:wrap}
+.rm-mini{font-size:7.5px;padding:2px 5px;border-radius:2px;font-family:'JetBrains Mono',monospace}
+/* CALENDAR */
+.cal-wrap{max-width:1200px;margin:0 auto;padding:20px 28px 60px}
+.cal-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px}
+.cal-month{background:var(--surface);border:1px solid var(--border);border-radius:7px;overflow:hidden}
+.cal-mhdr{padding:9px 12px;background:rgba(255,255,255,.025);border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center}
+.cal-mname{font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:.14em;color:var(--gold);text-transform:uppercase}
+.cal-mcnt{font-family:'JetBrains Mono',monospace;font-size:8.5px;color:var(--muted)}
+.cal-items{padding:7px}
+.cal-item{padding:6px 8px;border-radius:4px;margin-bottom:3px;border:1px solid var(--border);background:rgba(255,255,255,.02)}
+.cal-item:last-child{margin-bottom:0}
+.cal-iname{
+  font-size:12.5px;
+  color:var(--text);
+  line-height:1.35;
+  margin-bottom:2px;
+  font-weight:600;
+}
+.cal-imeta{display:flex;gap:4px;flex-wrap:wrap;align-items:center}
+.cal-tag{font-family:'JetBrains Mono',monospace;font-size:7.5px;padding:1px 5px;border-radius:2px}
+/* SATURATION */
+.sat-wrap{max-width:1200px;margin:0 auto;padding:20px 28px 60px}
+.sat-legend{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:18px}
+.sat-pill{display:flex;align-items:center;gap:5px;padding:4px 10px;border-radius:4px;border:1px solid;font-family:'JetBrains Mono',monospace;font-size:9.5px}
+.sat-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
+.sat-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:7px;margin-bottom:24px}
+.sat-card{background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:11px 13px;display:flex;flex-direction:column;gap:4px}
+.sat-top{display:flex;justify-content:space-between;gap:7px}
+.sat-name{
+  font-size:13px;
+  color:var(--text);
+  line-height:1.35;
+  font-weight:600;
+}
+.sat-why{font-size:11px;color:#7A7060;line-height:1.5}
+::-webkit-scrollbar{width:4px;height:4px}::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
+</style>
+</head>
+<body>
+<div class="tab-bar">
+  <div class="tab-buttons">
+    <button class="tab-btn active" onclick="switchTab('db')">📋 Database</button>
+    <button class="tab-btn" onclick="switchTab('pb')">👤 Profile Builder</button>
+    <button class="tab-btn" onclick="switchTab('cal')">📅 Deadlines</button>
+    <button class="tab-btn" onclick="switchTab('sat')">📊 Saturation</button>
+    <button class="tab-btn" onclick="switchTab('jrn')">📰 Journals</button>
+  </div>
+  <button class="theme-toggle" id="theme-toggle" onclick="toggleTheme()" title="Toggle Light/Dark Mode">🌙</button>
+</div>
+<!-- TAB 1 -->
+<div id="tab-db" class="tab-content active">
+  <div class="hdr"><div class="hdr-inner">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:12px">
+      <div><div class="eyebrow">Profile Intelligence System v5 · UG Admissions</div><h1 class="hdr-title">External Validation <em>Database</em></h1><p class="hdr-sub" id="hdr-sub"></p></div>
+      <div style="display:flex;gap:20px" id="hdr-stats"></div>
+    </div>
+    <div class="legend-row">
+      <div class="lpill" style="background:rgba(212,175,55,.07);border:1px solid rgba(212,175,55,.28)"><span style="color:#D4AF37;font-family:'JetBrains Mono',monospace;font-size:9px;font-weight:600">1</span><span style="color:#9A8040;margin-left:4px">Summa · Changes outcomes</span></div>
+      <div class="lpill" style="background:rgba(126,184,212,.07);border:1px solid rgba(126,184,212,.25)"><span style="color:#7EB8D4;font-family:'JetBrains Mono',monospace;font-size:9px;font-weight:600">2</span><span style="color:#507080;margin-left:4px">Magna · Strongly differentiates</span></div>
+      <div class="lpill" style="background:rgba(109,221,181,.06);border:1px solid rgba(109,221,181,.22)"><span style="color:#6DDDB5;font-family:'JetBrains Mono',monospace;font-size:9px;font-weight:600">3</span><span style="color:#407860;margin-left:4px">Cum Laude · Positive signal</span></div>
+      <div class="lpill" style="background:rgba(192,132,252,.06);border:1px solid rgba(192,132,252,.22)"><span style="color:#C084FC;font-family:'JetBrains Mono',monospace;font-size:9px">IVY</span><span style="color:#7A5090;margin-left:4px">Strong at Ivy</span></div>
+      <div class="lpill" style="background:rgba(56,189,248,.06);border:1px solid rgba(56,189,248,.22)"><span style="color:#38BDF8;font-family:'JetBrains Mono',monospace;font-size:9px">OXB</span><span style="color:#305870;margin-left:4px">Strong at Oxbridge</span></div>
+      <div class="lpill" style="background:rgba(74,222,128,.06);border:1px solid rgba(74,222,128,.2)"><span style="color:#4ADE80;font-family:'JetBrains Mono',monospace;font-size:9px">● LOW SAT</span><span style="color:#2A6040;margin-left:4px">Early-mover advantage</span></div>
+    </div>
+  </div></div>
+  <div class="cstrip"><div style="max-width:1440px;margin:0 auto"><div class="cs-lbl">Filter by student country · Opportunities validated for US &amp; UK admissions</div><div class="cs-row" id="country-row"></div></div></div>
+  <div class="body-wrap">
+    <div class="search-wrap"><input class="sbox" id="db-search" placeholder="Search by name, field, keyword…" oninput="renderDB()"/></div>
+    <div class="filters" id="db-filters"></div>
+    <div class="layout">
+      <div class="sidebar"><div class="sb-lbl">Fields</div><div id="field-nav"></div></div>
+      <div class="main">
+        <div class="rbar"><div class="rmeta" id="db-meta"></div><div class="cpills" id="db-cpills"></div></div>
+        <div class="grid" id="db-grid"></div>
+        <div class="nores" id="db-nores" style="display:none">No results match your filters.</div>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- TAB 2 -->
+<div id="tab-pb" class="tab-content">
+  <div class="pb-wrap">
+    <div class="eyebrow" style="margin-bottom:8px">Student Profile Builder</div>
+    <h2 style="font-size:22px;font-weight:400;color:#3d84d0;margin-bottom:5px">Year-by-Year Roadmap Generator</h2>
+    <p style="font-size:12.5px;color:var(--muted);margin-bottom:22px">Enter student profile → get a sequenced action plan for every remaining year. Calibrated for <strong style="color:var(--gold)">Ivy League &amp; Oxbridge</strong> only.</p>
+    <div class="pb-sec"><div class="pb-title">Step 1 — Basics</div>
+      <div class="pb-row">
+        <div class="pb-field"><div class="pb-label">Grade</div><select class="pb-select" id="pb-grade"><option value="9">Grade 9</option><option value="10">Grade 10</option><option value="11">Grade 11</option><option value="12">Grade 12</option></select></div>
+        <div class="pb-field"><div class="pb-label">Country</div><select class="pb-select" id="pb-country"><option value="US">🇺🇸 United States</option><option value="IN">🇮🇳 India</option><option value="SG">🇸🇬 Singapore</option><option value="UK">🇬🇧 United Kingdom</option></select></div>
+        <div class="pb-field"><div class="pb-label">Target</div><select class="pb-select" id="pb-target"><option value="both">Ivy + Oxbridge</option><option value="ivy">Ivy only</option><option value="oxb">Oxbridge only</option></select></div>
+      </div>
+    </div>
+    <div class="pb-sec"><div class="pb-title">Step 2 — Primary Field(s)</div><div class="pb-chips" id="pb-fields"></div></div>
+    <div class="pb-sec"><div class="pb-title">Step 3 — Strongest Existing Credential (optional)</div><div class="pb-chips" id="pb-creds"></div></div>
+    <button class="pb-go" onclick="buildRoadmap()">Generate Roadmap →</button>
+    <div id="roadmap-output"></div>
+  </div>
+</div>
+<!-- TAB 3 -->
+<div id="tab-cal" class="tab-content">
+  <div class="cal-wrap">
+    <div class="eyebrow" style="margin-bottom:7px">Deadline Calendar</div>
+    <h2 style="font-size:22px;font-weight:400;color:#3d84d0;margin-bottom:5px">Competition &amp; Programme Deadlines</h2>
+    <p style="font-size:12.5px;color:var(--muted);margin-bottom:16px">Next 12 months. Always verify on official site — dates shift annually.</p>
+    <div class="filters" id="cal-filters"></div>
+    <div style="display:flex;align-items:center;gap:8px;font-family:'JetBrains Mono',monospace;font-size:9px;color:#EF4444;margin-bottom:14px"><div style="flex:1;height:1px;background:rgba(239,68,68,.25)"></div><span>TODAY</span><div style="flex:1;height:1px;background:rgba(239,68,68,.25)"></div></div>
+    <div class="cal-grid" id="cal-grid"></div>
+  </div>
+</div>
+<!-- TAB 4 -->
+<div id="tab-sat" class="tab-content">
+  <div class="sat-wrap">
+    <div class="eyebrow" style="margin-bottom:7px">Saturation Intelligence</div>
+    <h2 style="font-size:22px;font-weight:400;color:#3d84d0;margin-bottom:5px">How Crowded Is Each Opportunity?</h2>
+    <p style="font-size:12.5px;color:var(--muted);margin-bottom:18px">Based on observed applicant pool frequency. Fresh = early-mover advantage. Saturated = presence alone no longer differentiates at Ivy/Oxbridge level.</p>
+    <div class="sat-legend">
+      <div class="sat-pill" style="color:#4ADE80;border-color:rgba(74,222,128,.25);background:rgba(74,222,128,.05)"><span class="sat-dot" style="background:#4ADE80"></span>FRESH &lt;5% of pools</div>
+      <div class="sat-pill" style="color:#A3E635;border-color:rgba(163,230,53,.22);background:rgba(163,230,53,.04)"><span class="sat-dot" style="background:#A3E635"></span>LOW — Uncommon</div>
+      <div class="sat-pill" style="color:#FBBF24;border-color:rgba(251,191,36,.22);background:rgba(251,191,36,.04)"><span class="sat-dot" style="background:#FBBF24"></span>MODERATE — Present</div>
+      <div class="sat-pill" style="color:#F97316;border-color:rgba(249,115,22,.22);background:rgba(249,115,22,.04)"><span class="sat-dot" style="background:#F97316"></span>HIGH — Common</div>
+      <div class="sat-pill" style="color:#EF4444;border-color:rgba(239,68,68,.22);background:rgba(239,68,68,.04)"><span class="sat-dot" style="background:#EF4444"></span>SATURATED — Doesn't differentiate</div>
+    </div>
+    <div id="sat-output"></div>
+  </div>
+</div>
+<!-- TAB 5 -->
+<div id="tab-jrn" class="tab-content">
+  <div class="hdr"><div class="hdr-inner">
+    <div class="eyebrow">Research Validation · Publication Directory</div>
+    <h1 class="hdr-title">Journals &amp; Research <em>Platforms</em></h1>
+    <p class="hdr-sub">Where HS students build credible publishing records. Graded by AO recognition — not just indexing. Verify submission guidelines on official sites before submitting.</p>
+    <div class="legend-row">
+      <div class="lpill" style="background:rgba(212,175,55,.07);border:1px solid rgba(212,175,55,.28)"><span style="color:#D4AF37;font-family:'JetBrains Mono',monospace;font-size:9px">T1</span><span style="color:#9A8040;margin-left:4px">Elite HS — AOs know instantly</span></div>
+      <div class="lpill" style="background:rgba(126,184,212,.07);border:1px solid rgba(126,184,212,.25)"><span style="color:#7EB8D4;font-family:'JetBrains Mono',monospace;font-size:9px">T2</span><span style="color:#507080;margin-left:4px">Strong HS — Growing recognition</span></div>
+      <div class="lpill" style="background:rgba(109,221,181,.06);border:1px solid rgba(109,221,181,.22)"><span style="color:#6DDDB5;font-family:'JetBrains Mono',monospace;font-size:9px">T3</span><span style="color:#407860;margin-left:4px">Scopus/WoS — PI co-authorship required</span></div>
+      <div class="lpill" style="background:rgba(167,139,250,.06);border:1px solid rgba(167,139,250,.22)"><span style="color:#A78BFA;font-family:'JetBrains Mono',monospace;font-size:9px">T4</span><span style="color:#5A3090;margin-left:4px">Preprint — Free, immediate, citable</span></div>
+    </div>
+  </div></div>
+  <div class="jrn-wrap">
+    <div class="search-wrap" style="margin-bottom:10px"><input class="sbox" id="jrn-search" placeholder="Search journals by name, subject, abbreviation…" oninput="renderJournals()"/></div>
+    <div class="filters" id="jrn-filters"></div>
+    <div class="layout">
+      <div class="sidebar"><div class="sb-lbl">Subject Area</div><div id="jrn-field-nav"></div></div>
+      <div class="main"><div class="rbar"><div class="rmeta" id="jrn-meta"></div></div><div id="jrn-output"></div></div>
+    </div>
+  </div>
+</div>
+<script>
+const DATA=[
+{f:"Mathematics",n:"AMC 10/12 → AIME → USAMO/USAJMO",t:"Competition",g:1,na:false,countries:["US"],dl:"Nov (AMC) / Jan (AIME)",dlm:11,sat:3,ivy:1,oxb:3,d:"The canonical US math olympiad pathway. USAMO selection (~500/yr) is one of the world's most recognised pre-college math signals.",url:"https://maa.org/student-programs/amc/",note:"USAMO qualification triggers attention from every Ivy AO."},
+{f:"Mathematics",n:"RMO → INMO → IMOTC → IMO (India)",t:"Competition",g:1,na:false,countries:["IN"],dl:"Oct (RMO) / Jan (INMO)",dlm:10,sat:2,ivy:1,oxb:2,d:"India's official math olympiad pathway run by HBCSE/TIFR. Regional → INMO (~30 students) → Training Camp → IMO Team (6).",url:"https://olympiads.hbcse.tifr.res.in/which-olympiads/mathematics/",note:"INMO qualification is Summa-level. IMO team = globally extraordinary."},
+{f:"Mathematics",n:"SMO — Open Special Round (Singapore)",t:"Competition",g:1,na:false,countries:["SG"],dl:"May–Jun",dlm:5,sat:2,ivy:1,oxb:2,d:"Singapore Mathematical Olympiad Open Special Round selects Singapore's IMO team.",url:"https://www.nussms.org/smo",note:"SMO Open top placement is the clearest math signal for SG applicants."},
+{f:"Mathematics",n:"UKMT Senior → BMO1 → BMO2 → IMO",t:"Competition",g:1,na:false,countries:["UK"],dl:"Nov (SMC) / Dec (BMO1)",dlm:11,sat:2,ivy:2,oxb:1,d:"UK Mathematics Trust pathway: SMC → BMO1 → BMO2 → IMO shortlist. BMO2 top 100 is exceptional.",url:"https://www.ukmt.org.uk/competitions/senior",note:"BMO2 is the clear differentiating signal."},
+{f:"Mathematics",n:"MIT PRIMES / PRIMES-USA",t:"Program",g:1,na:false,countries:["ALL"],dl:"Dec application",dlm:12,sat:1,ivy:1,oxb:2,d:"MIT's year-long mentored research programme producing publishable original mathematics.",url:"https://math.mit.edu/research/highschool/primes/index.php",note:"A PRIMES publication is one of the rarest credentials possible globally."},
+{f:"Mathematics",n:"Research Science Institute (RSI) at MIT",t:"Program",g:1,na:false,countries:["ALL"],dl:"Dec application",dlm:12,sat:1,ivy:1,oxb:2,d:"MIT-hosted 6-week summer research for 100 of the world's top HS juniors. ~2.5% acceptance.",url:"https://www.cee.org/programs/research-science-institute",note:"Among the two most prestigious pre-college programs globally."},
+{f:"Mathematics",n:"Canada/USA Mathcamp",t:"Program",g:1,na:false,countries:["ALL"],dl:"Feb–Mar application",dlm:2,sat:1,ivy:1,oxb:2,d:"Intensive 5-week residential math program for ages 13–18. ~10% acceptance. Open globally.",url:"https://www.mathcamp.org",note:"One of the three most prestigious residential math programs globally."},
+{f:"Mathematics",n:"Ross Mathematics Program",t:"Program",g:1,na:false,countries:["ALL"],dl:"Mar–Apr application",dlm:3,sat:1,ivy:1,oxb:2,d:"8-week residential number theory program at Ohio State. Proof-based exploration. Founded 1957.",url:"https://rossprogram.org"},
+{f:"Mathematics",n:"European Girls' Mathematical Olympiad (EGMO)",t:"Competition",g:1,na:false,countries:["ALL"],dl:"National selection Oct–Feb",dlm:10,sat:1,ivy:1,oxb:1,d:"International olympiad for female-identifying students. Any EGMO team member is Summa-level.",url:"https://www.egmo.org"},
+{f:"Mathematics",n:"HMMT — Harvard-MIT Math Tournament",t:"Competition",g:2,na:false,countries:["ALL"],dl:"Nov + Feb",dlm:11,sat:3,ivy:2,oxb:2,d:"Prestige individual + team tournament run by Harvard/MIT students. Open to international teams.",url:"https://www.hmmt.org"},
+{f:"Mathematics",n:"PUMAC — Princeton University Math Competition",t:"Competition",g:2,na:false,countries:["ALL"],dl:"Nov",dlm:11,sat:2,ivy:2,oxb:2,d:"One of the most prestigious university-run math tournaments. Open globally.",url:"https://pumac.princeton.edu"},
+{f:"Mathematics",n:"COMAP MCM / ICM",t:"Competition",g:2,na:false,countries:["ALL"],dl:"Jan–Feb",dlm:1,sat:2,ivy:2,oxb:2,d:"Mathematical modelling contest open globally. Outstanding/Meritorious designations valued.",url:"https://www.contest.comap.com/undergraduate/contests/"},
+{f:"Mathematics",n:"International Mathematical Modeling Challenge (IM²C)",t:"Competition",g:2,na:false,countries:["ALL"],dl:"Mar–Apr",dlm:3,sat:1,ivy:2,oxb:2,d:"Teams apply math to open-ended real-world problems. Outstanding designation globally recognised.",url:"https://www.immchallenge.org"},
+{f:"Mathematics",n:"Math Prize for Girls at MIT",t:"Competition",g:2,na:false,countries:["ALL"],dl:"Sep",dlm:9,sat:2,ivy:2,oxb:2,d:"Top math competition for female-identifying students, run at MIT. Open internationally.",url:"https://mathprize.atfoundation.org"},
+{f:"Computer Science & AI",n:"USACO — Platinum / Finalist",t:"Competition",g:1,na:false,countries:["US"],dl:"Dec / Jan / Feb",dlm:12,sat:3,ivy:1,oxb:2,d:"The US gold standard for algorithmic CS. Platinum division signals elite ability to every Ivy AO.",url:"https://usaco.org",note:"Platinum is a clear differentiator."},
+{f:"Computer Science & AI",n:"IOITC → IOI (India Informatics)",t:"Competition",g:1,na:false,countries:["IN"],dl:"Dec (ZCO) / Jan (INOI)",dlm:12,sat:1,ivy:1,oxb:2,d:"India's informatics olympiad: ZIO/ZCO → INOI → IOITC Training Camp → IOI Team.",url:"https://www.iarcs.org.in/inoi/",note:"IOITC selection is Summa-level."},
+{f:"Computer Science & AI",n:"NOI Singapore → IOI",t:"Competition",g:1,na:false,countries:["SG"],dl:"Oct–Feb",dlm:10,sat:1,ivy:1,oxb:2,d:"National Olympiad in Informatics run by NUS. Top performers represent Singapore at IOI.",url:"https://noisg.comp.nus.edu.sg"},
+{f:"Computer Science & AI",n:"British Informatics Olympiad (BIO)",t:"Competition",g:1,na:false,countries:["UK"],dl:"Jan",dlm:1,sat:1,ivy:2,oxb:1,d:"UK's national programming competition. Top 6 represent the UK at IOI.",url:"https://www.olympiad.org.uk"},
+{f:"Computer Science & AI",n:"MIT THINK Scholars Program",t:"Program",g:1,na:false,countries:["US"],dl:"Nov–Jan",dlm:11,sat:1,ivy:1,oxb:2,d:"MIT awards ~10 HS teams funding ($1K) to build STEM projects. Exceptionally selective.",url:"https://think.mit.edu"},
+{f:"Computer Science & AI",n:"iGEM High School Track",t:"Competition",g:2,na:false,countries:["ALL"],dl:"Oct (Giant Jamboree)",dlm:6,sat:1,ivy:1,oxb:2,d:"International Genetically Engineered Machine. HS teams design synthetic biology projects. Open globally.",url:"https://igem.org"},
+{f:"Computer Science & AI",n:"Codeforces — Expert (1600+) or Master",t:"Platform",g:2,na:true,countries:["ALL"],dl:"Ongoing",dlm:0,sat:1,ivy:2,oxb:2,d:"Codeforces rating is the most credible algorithmic contest benchmark globally. Independently verifiable.",url:"https://codeforces.com"},
+{f:"Computer Science & AI",n:"GitHub — OSS Contributions (1K+ Stars)",t:"Platform",g:2,na:true,countries:["ALL"],dl:"Ongoing",dlm:0,sat:2,ivy:2,oxb:2,d:"Maintaining a public repo with 1,000+ stars. Independently verifiable.",url:"https://github.com"},
+{f:"Computer Science & AI",n:"Kaggle — Expert / Master / Grandmaster",t:"Platform",g:2,na:true,countries:["ALL"],dl:"Ongoing",dlm:0,sat:2,ivy:2,oxb:2,d:"Top-1% finishes or Expert/Master/Grandmaster rank. Global leaderboard independently verifiable.",url:"https://www.kaggle.com/progression"},
+{f:"Computer Science & AI",n:"Congressional App Challenge",t:"Competition",g:2,na:false,countries:["US"],dl:"Nov",dlm:11,sat:3,ivy:2,oxb:3,d:"Each US congressional district selects a winning app displayed in the US Capitol.",url:"https://www.congressionalappchallenge.us"},
+{f:"Computer Science & AI",n:"MIT Battlecode AI Competition",t:"Competition",g:2,na:true,countries:["ALL"],dl:"Jan",dlm:1,sat:1,ivy:2,oxb:2,d:"MIT's annual AI competition where teams build autonomous agents. Open globally.",url:"https://battlecode.org"},
+{f:"Computer Science & AI",n:"FIRST Robotics — Dean's List Award",t:"Competition",g:1,na:false,countries:["ALL"],dl:"Mar–Apr",dlm:3,sat:1,ivy:1,oxb:2,d:"The highest individual honour in FIRST Robotics globally. Only 10 students worldwide per year.",url:"https://www.firstinspires.org/robotics/frc/dean-s-list",note:"Dean's List is dramatically stronger than Chairman's Award for individual recognition."},
+{f:"Computer Science & AI",n:"Meta Hacker Cup — Top 500",t:"Competition",g:2,na:true,countries:["ALL"],dl:"Aug–Nov",dlm:8,sat:1,ivy:2,oxb:2,d:"Meta's annual global algorithmic programming contest. Top-500 finish is a verifiable elite signal.",url:"https://www.facebook.com/codingcompetitions/hacker-cup"},
+{f:"Computer Science & AI",n:"Google Hash Code / Code Jam",t:"Competition",g:2,na:true,countries:["ALL"],dl:"Feb (Hash Code)",dlm:2,sat:2,ivy:2,oxb:2,d:"Google's flagship coding competitions. Global finalist placement is a strong CS signal.",url:"https://codingcompetitions.withgoogle.com"},
+{f:"Natural Sciences",n:"Regeneron Science Talent Search (STS)",t:"Competition",g:1,na:false,countries:["US"],dl:"Oct–Nov application",dlm:10,sat:3,ivy:1,oxb:2,d:"The Nobel Prize of high school science. Top 40 finalists receive $25K–$250K.",url:"https://www.societyforscience.org/regeneron-sts/",note:"Finalist status is near-automatic admission-conversation level."},
+{f:"Natural Sciences",n:"Regeneron ISEF — Grand Award",t:"Competition",g:1,na:false,countries:["ALL"],dl:"May",dlm:5,sat:3,ivy:1,oxb:2,d:"World's largest pre-college science fair. Grand Award ($50K+) is Summa-level.",url:"https://www.societyforscience.org/isef/"},
+{f:"Natural Sciences",n:"IRIS National Science Fair → ISEF (India)",t:"Competition",g:1,na:false,countries:["IN"],dl:"Aug–Oct",dlm:8,sat:1,ivy:1,oxb:2,d:"India's ISEF-affiliated national fair run with DST support. National winner represents India at ISEF.",url:"https://www.irisnationals.in"},
+{f:"Natural Sciences",n:"Singapore Science & Engineering Fair (SSEF)",t:"Competition",g:1,na:false,countries:["SG"],dl:"Oct–Jan",dlm:10,sat:1,ivy:1,oxb:2,d:"Singapore's ISEF-affiliated national fair. Gold Award winners represent Singapore at ISEF.",url:"https://www.science.edu.sg/for-schools/competitions/singapore-science-and-engineering-fair"},
+{f:"Natural Sciences",n:"Indian National Olympiads — INPhO/INChO/INBO/INAO",t:"Competition",g:1,na:false,countries:["IN"],dl:"Nov / Jan",dlm:11,sat:2,ivy:1,oxb:2,d:"Run by HBCSE/TIFR. OCSC training camp and international team selection.",url:"https://olympiads.hbcse.tifr.res.in",note:"OCSC camp selection is clearly Summa for Indian applicants."},
+{f:"Natural Sciences",n:"USABO / USAPhO / USNCO",t:"Competition",g:1,na:false,countries:["US"],dl:"Jan (USABO) / Jan (F=ma) / Mar (USNCO)",dlm:1,sat:3,ivy:1,oxb:2,d:"Three premier US science olympiads in Biology, Physics, and Chemistry.",url:"https://www.aapt.org/Programs/PhysicsOlympiads/"},
+{f:"Natural Sciences",n:"UK Science Olympiads — BPhO / RSC Chem / UK BIO",t:"Competition",g:2,na:false,countries:["UK"],dl:"Nov (BPhO) / Mar (RSC)",dlm:11,sat:2,ivy:2,oxb:1,d:"British Physics Olympiad, RSC Chemistry Olympiad (Gold), UK Biology Olympiad.",url:"https://www.bpho.org.uk"},
+{f:"Natural Sciences",n:"Singapore Science Olympiad Teams",t:"Competition",g:1,na:false,countries:["SG"],dl:"Jan–Apr",dlm:1,sat:1,ivy:1,oxb:2,d:"Singapore's national science olympiads managed through MOE. Team member = Summa-level.",url:"https://www.science.edu.sg/for-schools/competitions"},
+{f:"Natural Sciences",n:"Summer Science Program (SSP)",t:"Program",g:1,na:false,countries:["ALL"],dl:"Jan–Feb",dlm:1,sat:2,ivy:1,oxb:2,d:"5-week residential research at US universities. Astrophysics or biochemistry. ~15% acceptance.",url:"https://summerscience.org"},
+{f:"Natural Sciences",n:"KVPY — Kishore Vaigyanik Protsahan Yojana",t:"Program",g:1,na:false,countries:["IN"],dl:"Sep application",dlm:9,sat:1,ivy:1,oxb:2,d:"India's most prestigious national science scholarship for basic sciences.",url:"https://kvpy.iisc.ac.in",note:"KVPY Fellow status is Summa-level for Indian science applicants."},
+{f:"Natural Sciences",n:"International Olympiad on Astronomy & Astrophysics (IOAA)",t:"Competition",g:1,na:false,countries:["ALL"],dl:"National Oct / Jul (intl)",dlm:10,sat:1,ivy:1,oxb:1,d:"International astronomy & astrophysics olympiad. National team member is Summa-level.",url:"https://www.ioaastrophysics.org",note:"Far less saturated than IPhO/IChO."},
+{f:"Natural Sciences",n:"International Earth Science Olympiad (IESO)",t:"Competition",g:1,na:false,countries:["ALL"],dl:"National varies / Aug",dlm:8,sat:1,ivy:1,oxb:2,d:"International competition in geology, oceanography, and meteorology.",url:"https://www.ieso-info.org"},
+{f:"Natural Sciences",n:"GENIUS Olympiad",t:"Competition",g:2,na:false,countries:["ALL"],dl:"Jan–Mar",dlm:1,sat:1,ivy:2,oxb:2,d:"International HS project competition on environmental issues at SUNY Oswego.",url:"https://www.geniusolympiad.org"},
+{f:"Natural Sciences",n:"Journal of Emerging Investigators (JEI)",t:"Journal",g:2,na:false,countries:["ALL"],dl:"Rolling",dlm:0,sat:2,ivy:2,oxb:2,d:"Harvard-founded peer-reviewed journal publishing original science research by HS students.",url:"https://www.emerginginvestigators.org"},
+{f:"Natural Sciences",n:"IASc Summer Research Fellowship (India)",t:"Program",g:1,na:false,countries:["IN"],dl:"Nov–Dec",dlm:11,sat:1,ivy:1,oxb:2,d:"Three Indian Academies jointly offer fellowships placing students in IISc, IIT, IISER labs.",url:"https://www.ias.ac.in/SRFPInfo.html"},
+{f:"Natural Sciences",n:"A*STAR Research Attachment Programme",t:"Program",g:1,na:false,countries:["SG"],dl:"Varies by lab",dlm:0,sat:1,ivy:1,oxb:2,d:"Agency for Science, Technology and Research places exceptional students in world-class labs.",url:"https://www.a-star.edu.sg"},
+{f:"Natural Sciences",n:"Nuffield Research Placement (UK)",t:"Program",g:2,na:false,countries:["UK"],dl:"Nov–Jan",dlm:11,sat:3,ivy:3,oxb:2,d:"Places Year 12 students in university, industry, or research labs for 4–6 weeks.",url:"https://www.nuffieldresearchplacements.org",note:"Nuffield alone is Grade 3. Nuffield + JEI/ISEF publication = Grade 1–2."},
+{f:"Natural Sciences",n:"Davidson Fellows Scholarship",t:"Program",g:1,na:false,countries:["US"],dl:"Feb application",dlm:2,sat:1,ivy:1,oxb:2,d:"Recognises extraordinary original work by US students under 18. $10K–$50K.",url:"https://www.davidsonfellows.org/programs/davidson-fellows/"},
+{f:"Natural Sciences",n:"Science Mentorship Programme (SMP) — A*STAR/NUS",t:"Program",g:2,na:false,countries:["SG"],dl:"Apr–Jun",dlm:4,sat:2,ivy:2,oxb:2,d:"Connects Singapore students with A*STAR and NUS researchers for year-long mentored research.",url:"https://www.science.edu.sg/for-schools/programmes/science-mentorship-programme"},
+{f:"Social Sciences & Economics",n:"John Locke Global Essay Prize",t:"Competition",g:1,na:false,countries:["ALL"],dl:"Jun 30 (submission)",dlm:4,sat:2,ivy:1,oxb:1,d:"World's most prestigious humanities essay competition. 63,000+ entries from 150+ countries. Judged by Oxford, Cambridge, Harvard faculty. 0.6% win rate.",url:"https://www.johnlockeinstitute.com/essay-competition",note:"Category winner or shortlisted is a very strong signal. Over half of alumni enrolled at top Ivy/Oxbridge institutions."},
+{f:"Social Sciences & Economics",n:"US Economics Olympiad (USAEO) → IEO",t:"Competition",g:1,na:false,countries:["US"],dl:"Feb–Mar",dlm:2,sat:1,ivy:1,oxb:2,d:"Selects the US team for the International Economics Olympiad.",url:"https://usaeo.org"},
+{f:"Social Sciences & Economics",n:"International Economics Olympiad (IEO)",t:"Competition",g:1,na:true,countries:["IN","SG","UK"],dl:"Feb–Apr",dlm:2,sat:1,ivy:1,oxb:2,d:"National team selection combining economics, financial literacy, and creative thinking.",url:"https://ieo.world"},
+{f:"Social Sciences & Economics",n:"Fed Challenge (US Federal Reserve)",t:"Competition",g:2,na:false,countries:["US"],dl:"Spring",dlm:3,sat:2,ivy:2,oxb:3,d:"Teams analyse the US economy before real Federal Reserve economists.",url:"https://www.federalreserveeducation.org/programs/high-school-programs/fed-challenge"},
+{f:"Social Sciences & Economics",n:"Bank of England Schools Competition (UK)",t:"Competition",g:2,na:false,countries:["UK"],dl:"Feb–May",dlm:2,sat:2,ivy:2,oxb:1,d:"Teams present monetary policy analysis before Bank of England economists.",url:"https://www.bankofengland.co.uk/education",note:"Direct engagement with BoE economists carries institutional weight."},
+{f:"Social Sciences & Economics",n:"Wharton Global HS Investment Competition",t:"Competition",g:2,na:false,countries:["ALL"],dl:"Spring",dlm:3,sat:2,ivy:2,oxb:2,d:"Teams manage simulated portfolios and present investment theses before Wharton faculty.",url:"https://globalyouth.wharton.upenn.edu/investment-competition/"},
+{f:"Social Sciences & Economics",n:"Harvard Political Review Essay Competition",t:"Competition",g:2,na:false,countries:["ALL"],dl:"Rolling",dlm:0,sat:2,ivy:2,oxb:2,d:"International essay competition. Winning essays published in Harvard Political Review.",url:"https://harvardpolitics.com"},
+{f:"Humanities & Writing",n:"The Concord Review",t:"Journal",g:1,na:false,countries:["ALL"],dl:"Rolling (4 issues/year)",dlm:0,sat:2,ivy:1,oxb:1,d:"The only academic journal publishing history research papers by HS students. ~5% acceptance.",url:"https://www.tcr.org",note:"One of the most durable humanities credentials available."},
+{f:"Humanities & Writing",n:"John Locke Global Essay Prize",t:"Competition",g:1,na:false,countries:["ALL"],dl:"Jun 30",dlm:4,sat:2,ivy:1,oxb:1,d:"63,000+ entries. Philosophy, Politics, History, Law, Economics, Psychology, Theology.",url:"https://www.johnlockeinstitute.com/essay-competition"},
+{f:"Humanities & Writing",n:"Scholastic Art & Writing — Gold Portfolio",t:"Competition",g:1,na:false,countries:["US"],dl:"Dec–Jan",dlm:12,sat:3,ivy:1,oxb:3,d:"Gold Portfolio is the highest Scholastic honour, recognised at Carnegie Hall nationally.",url:"https://www.artandwriting.org"},
+{f:"Humanities & Writing",n:"YoungArts Foundation — National Finalist",t:"Program",g:1,na:false,countries:["US"],dl:"Oct application",dlm:10,sat:2,ivy:1,oxb:2,d:"National recognition in 10 creative disciplines. Feeds into US Presidential Scholar in the Arts.",url:"https://youngarts.org"},
+{f:"Humanities & Writing",n:"Bennington Young Writers Awards",t:"Competition",g:2,na:false,countries:["US"],dl:"Feb",dlm:2,sat:2,ivy:2,oxb:2,d:"Prestigious US writing competition for grades 9–12. Winners receive $1K cash. Free to enter.",url:"https://www.bennington.edu/young-writers-awards"},
+{f:"Humanities & Writing",n:"International Linguistics Olympiad (IOL)",t:"Competition",g:1,na:false,countries:["ALL"],dl:"National varies / Jul",dlm:3,sat:1,ivy:1,oxb:1,d:"The international olympiad in linguistics. National team member is Summa-level.",url:"https://ioling.org",note:"Extraordinarily rare in any pool."},
+{f:"Humanities & Writing",n:"International Philosophy Olympiad (IPO)",t:"Competition",g:1,na:false,countries:["ALL"],dl:"National varies / May",dlm:2,sat:1,ivy:1,oxb:1,d:"International philosophy essay competition in a second language.",url:"https://philosophy-olympiad.org"},
+{f:"Humanities & Writing",n:"Polyphony Lit — Published Author",t:"Platform",g:2,na:true,countries:["ALL"],dl:"Rolling",dlm:0,sat:2,ivy:2,oxb:2,d:"Selective international literary magazine for HS students. Peer-reviewed by student editors from 300+ schools.",url:"https://polyphonylit.org"},
+{f:"Humanities & Writing",n:"Norman Mailer Award for Student Writing",t:"Competition",g:2,na:false,countries:["US"],dl:"Mar",dlm:3,sat:2,ivy:2,oxb:2,d:"Recognises nonfiction, fiction, poetry, journalism. Judged by NCTE.",url:"https://normanmailersociety.org/award-programs/norman-mailer-awards/student-writing-award/"},
+{f:"Humanities & Writing",n:"UKLO — Gold / International Round",t:"Competition",g:2,na:false,countries:["UK"],dl:"Feb",dlm:2,sat:2,ivy:2,oxb:1,d:"UK Linguistics Olympiad. Gold Award + international round selection is a strong signal.",url:"https://www.uklo.org"},
+{f:"Humanities & Writing",n:"National History Day — National Finalist",t:"Competition",g:2,na:false,countries:["US"],dl:"Mar (regionals) / Jun (nationals)",dlm:3,sat:3,ivy:2,oxb:3,d:"Annual research competition across documentary, exhibit, paper, performance, website.",url:"https://www.nhd.org"},
+{f:"Humanities & Writing",n:"Published Op-Ed in Major National Outlet",t:"Platform",g:2,na:true,countries:["ALL"],dl:"Rolling",dlm:0,sat:1,ivy:2,oxb:2,d:"A bylined piece in NYT, Guardian, The Hindu, Straits Times, The Atlantic, etc.",url:"https://www.nytimes.com/section/opinion"},
+{f:"Engineering & Robotics",n:"FIRST Robotics — Dean's List Award",t:"Competition",g:1,na:false,countries:["ALL"],dl:"Mar–Apr",dlm:3,sat:1,ivy:1,oxb:2,d:"The highest individual honour in FIRST Robotics globally. Only 10 students per year worldwide.",url:"https://www.firstinspires.org/robotics/frc/dean-s-list"},
+{f:"Engineering & Robotics",n:"Lemelson-MIT InvenTeams Grant",t:"Program",g:2,na:false,countries:["US"],dl:"Oct application",dlm:10,sat:1,ivy:2,oxb:2,d:"MIT awards up to $10K to teams of HS students to invent real-world solutions.",url:"https://lemelson.mit.edu/programs/inventeams"},
+{f:"Engineering & Robotics",n:"Arkwright Engineering Scholarship (UK)",t:"Program",g:2,na:false,countries:["UK"],dl:"Oct–Nov",dlm:10,sat:1,ivy:2,oxb:1,d:"Highly selective national scholarship identifying the UK's future engineering leaders.",url:"https://www.arkwright.org.uk/scholarship"},
+{f:"Engineering & Robotics",n:"MIT Beaver Works Summer Institute (BWSI)",t:"Program",g:1,na:false,countries:["ALL"],dl:"Feb–Mar",dlm:2,sat:1,ivy:1,oxb:2,d:"MIT Lincoln Laboratory 4-week intensive STEM program. ~5–10% acceptance. Open internationally.",url:"https://beaverworks.ll.mit.edu/CMS/bw/bwsi"},
+{f:"Engineering & Robotics",n:"US Provisional Patent / PCT Application",t:"Platform",g:2,na:true,countries:["ALL"],dl:"Rolling",dlm:0,sat:1,ivy:2,oxb:2,d:"Filing a provisional patent as a HS student is publicly verifiable and rare.",url:"https://www.uspto.gov/patents/apply"},
+{f:"Engineering & Robotics",n:"VEX Robotics World Championship — Top Team",t:"Competition",g:2,na:false,countries:["ALL"],dl:"Apr–May",dlm:4,sat:3,ivy:2,oxb:2,d:"Global robotics competition. Tournament Champion at Worlds is a strong engineering signal.",url:"https://www.vexrobotics.com/v5/competition"},
+{f:"Engineering & Robotics",n:"CanSat Competition (ESA / AAS)",t:"Competition",g:2,na:false,countries:["ALL"],dl:"Feb–Jun",dlm:2,sat:1,ivy:2,oxb:2,d:"Teams design, build and launch a satellite in a can. Strong aerospace signal.",url:"https://www.esa.int/Education/CanSat"},
+{f:"Engineering & Robotics",n:"Conrad Challenge",t:"Competition",g:2,na:false,countries:["ALL"],dl:"Nov–Jan",dlm:11,sat:2,ivy:2,oxb:2,d:"NASA and DoD-sponsored innovation competition. STEM and social innovation tracks. Open globally.",url:"https://www.conradchallenge.org"},
+{f:"Business & Entrepreneurship",n:"Ashoka Young Changemakers",t:"Organization",g:1,na:false,countries:["ALL"],dl:"Rolling",dlm:0,sat:1,ivy:1,oxb:2,d:"Ashoka selects exceptional young social entrepreneurs creating systemic change.",url:"https://www.ashoka.org/en-us/program/young-changemakers"},
+{f:"Business & Entrepreneurship",n:"Junior Achievement Company — International Final",t:"Competition",g:1,na:false,countries:["ALL"],dl:"National varies / Jun",dlm:5,sat:1,ivy:1,oxb:2,d:"Students create and run genuine companies. International finalist = Grade 1.",url:"https://jausa.ja.org/programs/ja-company-program"},
+{f:"Business & Entrepreneurship",n:"Diamond Challenge (Univ. of Delaware)",t:"Competition",g:2,na:false,countries:["ALL"],dl:"Jan–Feb",dlm:1,sat:2,ivy:2,oxb:2,d:"Global entrepreneurship competition. Social enterprise and business innovation tracks.",url:"https://www.diamondchallenge.org"},
+{f:"Business & Entrepreneurship",n:"DECA ICDC — Top Finalist",t:"Competition",g:2,na:false,countries:["US"],dl:"Apr",dlm:4,sat:3,ivy:2,oxb:3,d:"DECA International Career Development Conference. Top-20 finish in advanced Finance events.",url:"https://www.deca.org/high-school-programs/",note:"ICDC top finish only — general DECA participation is Grade 4."},
+{f:"Business & Entrepreneurship",n:"Young Enterprise — National Final (UK)",t:"Competition",g:2,na:false,countries:["UK"],dl:"May–Jun",dlm:5,sat:2,ivy:2,oxb:2,d:"UK's leading young business competition. Teams run real student companies.",url:"https://www.young-enterprise.org.uk"},
+{f:"Business & Entrepreneurship",n:"Tata Social Enterprise Challenge (India)",t:"Competition",g:2,na:false,countries:["IN"],dl:"Aug–Sep",dlm:8,sat:1,ivy:2,oxb:2,d:"Tata Group-backed national competition for social enterprises, supported by IIM Calcutta.",url:"https://www.tatasocialenterprisechallenge.com"},
+{f:"Business & Entrepreneurship",n:"App / Product with Verifiable Metrics",t:"Platform",g:2,na:true,countries:["ALL"],dl:"Rolling",dlm:0,sat:2,ivy:2,oxb:2,d:"A student-built app or product with measurable traction (App Store ranking, revenue).",url:"https://www.producthunt.com",note:"Revenue > user count. 10K users = strong. Revenue + growth = near-Summa."},
+{f:"Visual Arts & Music",n:"YoungArts Foundation — National Finalist",t:"Program",g:1,na:false,countries:["US"],dl:"Oct",dlm:10,sat:2,ivy:1,oxb:2,d:"National recognition across 10 creative disciplines. Top YoungArts + Presidential Scholar in the Arts.",url:"https://youngarts.org/apply/"},
+{f:"Visual Arts & Music",n:"Juilliard Pre-College Programme Admission",t:"Program",g:1,na:false,countries:["ALL"],dl:"Dec–Jan",dlm:12,sat:1,ivy:1,oxb:2,d:"Acceptance into Juilliard Pre-College is itself a Summa-level music credential.",url:"https://www.juilliard.edu/pre-college"},
+{f:"Visual Arts & Music",n:"State All-State Orchestra / Band / Choir (US)",t:"Competition",g:2,na:false,countries:["US"],dl:"Oct–Nov",dlm:10,sat:3,ivy:2,oxb:3,d:"All-State ensemble selection in competitive states (NY, TX, CA, IL) is a strong signal.",url:"https://www.nyssma.org/events/all-state/"},
+{f:"Visual Arts & Music",n:"ABRSM / Trinity — Grade 8 Distinction + Diploma",t:"Competition",g:2,na:false,countries:["UK","IN","SG"],dl:"Year-round",dlm:0,sat:3,ivy:2,oxb:2,d:"ABRSM or Trinity Grade 8 Distinction followed by DipABRSM or ARSM diploma.",url:"https://www.abrsm.org/en-gb/exams-and-awards/diplomas/",note:"Grade 8 Distinction alone is Grade 3. Diploma-level is the meaningful signal."},
+{f:"Environmental Science",n:"Stockholm Junior Water Prize",t:"Competition",g:1,na:false,countries:["ALL"],dl:"National varies / Aug",dlm:8,sat:1,ivy:1,oxb:2,d:"Global competition for water-related science research. National winners go to World Water Week in Stockholm.",url:"https://www.siwi.org/prizes/stockholm-junior-water-prize/"},
+{f:"Environmental Science",n:"GENIUS Olympiad",t:"Competition",g:2,na:false,countries:["ALL"],dl:"Jan–Mar",dlm:1,sat:1,ivy:2,oxb:2,d:"International HS project competition on environmental issues at SUNY Oswego.",url:"https://www.geniusolympiad.org"},
+{f:"Environmental Science",n:"Jane Goodall Roots & Shoots — Global Youth Award",t:"Organization",g:2,na:false,countries:["ALL"],dl:"Rolling",dlm:0,sat:2,ivy:2,oxb:2,d:"Global youth leadership network for environmental action. Active in US, India, Singapore, UK.",url:"https://www.rootsandshoots.org"},
+{f:"Environmental Science",n:"Royal Society Partnership Grant Research (UK)",t:"Program",g:2,na:false,countries:["UK"],dl:"Rolling",dlm:0,sat:1,ivy:2,oxb:1,d:"Royal Society funds school-university research partnerships with publishable outputs.",url:"https://royalsociety.org/grants-schemes-awards/grants/partnership-grants/"},
+{f:"Medicine & Neuroscience",n:"Simons Summer Research Programme (Stony Brook)",t:"Program",g:1,na:false,countries:["ALL"],dl:"Jan–Feb",dlm:1,sat:2,ivy:1,oxb:2,d:"7-week immersive research at Stony Brook with faculty mentors. ~50 students globally.",url:"https://www.stonybrook.edu/commcms/simons/"},
+{f:"Medicine & Neuroscience",n:"Society for Neuroscience — Neuroscience Research Prize",t:"Competition",g:2,na:false,countries:["ALL"],dl:"Mar–Apr",dlm:3,sat:1,ivy:2,oxb:2,d:"Annual competition judged by SfN. Open globally. Finalist or winner is extraordinary.",url:"https://www.sfn.org/initiatives/core-initiatives/neuroscience-research-prize"},
+{f:"Medicine & Neuroscience",n:"International Brain Bee Championship",t:"Competition",g:2,na:false,countries:["ALL"],dl:"Regional varies / Apr",dlm:4,sat:1,ivy:2,oxb:2,d:"Global neuroscience competition. 50+ national champions compete internationally.",url:"https://thebrainbee.org"},
+{f:"Medicine & Neuroscience",n:"Nanyang Research Programme (NRP) — NTU",t:"Program",g:2,na:false,countries:["SG"],dl:"Mar–Apr",dlm:3,sat:1,ivy:2,oxb:2,d:"NTU's flagship research programme placing JC/IP students in faculty labs.",url:"https://www.ntu.edu.sg/nrp"},
+{f:"Medicine & Neuroscience",n:"JSHS — Junior Science and Humanities Symposium",t:"Competition",g:2,na:false,countries:["US"],dl:"Dec–Jan",dlm:12,sat:2,ivy:2,oxb:3,d:"DoD-sponsored national research symposium. National finalists eligible for $12K scholarship.",url:"https://www.jshs.org"},
+{f:"Medicine & Neuroscience",n:"DNA Day Essay Contest (ASHG)",t:"Competition",g:2,na:false,countries:["ALL"],dl:"Mar",dlm:3,sat:1,ivy:2,oxb:2,d:"American Society of Human Genetics annual essay contest on genetics themes. Winner internationally recognised.",url:"https://www.ashg.org/discover-genetics/k-12-education/dna-day/"},
+{f:"Law, Policy & Government",n:"US Senate Youth Programme (USSENATEYPP)",t:"Program",g:1,na:false,countries:["US"],dl:"Oct–Nov",dlm:10,sat:2,ivy:1,oxb:2,d:"Only 104 students selected nationally (2 per state). A week in Washington meeting Senate leadership.",url:"https://www.ussenateypp.org",note:"Selection alone is Summa-level. Universally recognised by Ivy AOs."},
+{f:"Law, Policy & Government",n:"National Speech & Debate — TOC Octofinalist+",t:"Competition",g:1,na:false,countries:["US"],dl:"Apr (TOC)",dlm:4,sat:3,ivy:1,oxb:2,d:"Tournament of Champions bid competition in Policy, LD, or PF debate.",url:"https://www.speechanddebate.org/tournaments/tournament-of-champions/"},
+{f:"Law, Policy & Government",n:"UK Youth Parliament — Member (MYP)",t:"Organization",g:2,na:false,countries:["UK"],dl:"Rolling",dlm:0,sat:2,ivy:2,oxb:1,d:"Elected MYPs speak in the House of Commons chamber with active legislative records.",url:"https://www.ukyouthparliament.org.uk"},
+{f:"Law, Policy & Government",n:"Atlas Fellowship",t:"Program",g:2,na:true,countries:["ALL"],dl:"Rolling",dlm:0,sat:1,ivy:2,oxb:2,d:"Highly selective global fellowship for exceptional rationalist thinkers. $50K+ prize. Open globally.",url:"https://www.atlasfellowship.org"},
+{f:"Law, Policy & Government",n:"ESU Mace — National Debate Competition (UK)",t:"Competition",g:2,na:false,countries:["UK"],dl:"Spring",dlm:3,sat:2,ivy:2,oxb:1,d:"English-Speaking Union's premier UK schools debating competition.",url:"https://www.esu.org/programmes/schools-competitions/the-mace/"},
+{f:"Law, Policy & Government",n:"International History Olympiad (IHO)",t:"Competition",g:1,na:false,countries:["ALL"],dl:"National varies",dlm:0,sat:1,ivy:1,oxb:1,d:"Global olympiad in history and social studies. National team selection is highly selective.",url:"https://www.historyolympiad.com"},
+{f:"Law, Policy & Government",n:"Boys State / Boys Nation",t:"Program",g:2,na:false,countries:["US"],dl:"Jun–Jul",dlm:6,sat:2,ivy:2,oxb:3,d:"Boys/Girls Nation delegates meet the President of the United States.",url:"https://www.legion.org/boysnation/"},
+{f:"New Age & Cross-Field",n:"Cold-Lab Research → Publication Co-authorship",t:"Program",g:1,na:true,countries:["ALL"],dl:"Rolling (cold-email)",dlm:0,sat:1,ivy:1,oxb:1,d:"Cold-emailing professors, securing a lab position, and earning co-authorship is the highest-ceiling strategy globally.",url:"https://www.biorxiv.org",note:"Has produced Summa profiles at scale across all four countries."},
+{f:"New Age & Cross-Field",n:"Breakthrough Junior Challenge",t:"Competition",g:1,na:true,countries:["ALL"],dl:"Jun–Sep",dlm:6,sat:2,ivy:1,oxb:2,d:"Global competition to create a short science/math explainer video. Global winner receives $400K scholarship.",url:"https://breakthroughprize.org/YoungScientists"},
+{f:"New Age & Cross-Field",n:"arXiv Preprint — Original STEM Research",t:"Platform",g:2,na:true,countries:["ALL"],dl:"Rolling",dlm:0,sat:1,ivy:2,oxb:2,d:"Submitting original research to arXiv is permanently date-stamped and globally citable.",url:"https://arxiv.org"},
+{f:"New Age & Cross-Field",n:"MIT Beaver Works Summer Institute (BWSI)",t:"Program",g:1,na:false,countries:["ALL"],dl:"Feb–Mar",dlm:2,sat:1,ivy:1,oxb:2,d:"MIT Lincoln Laboratory 4-week intensive program. Autonomous vehicles, quantum computing, AI.",url:"https://beaverworks.ll.mit.edu/CMS/bw/bwsi"},
+{f:"New Age & Cross-Field",n:"Substack / Newsletter — 10K+ Subscribers",t:"Platform",g:2,na:true,countries:["ALL"],dl:"Rolling",dlm:0,sat:2,ivy:2,oxb:2,d:"A student-authored newsletter with substantial following is measurable proof of intellectual leadership.",url:"https://substack.com",note:"1K = adequate. 10K = strong. 50K+ = extraordinary."},
+{f:"New Age & Cross-Field",n:"TEDx — Licensed Event Organiser",t:"Platform",g:2,na:true,countries:["ALL"],dl:"Rolling",dlm:0,sat:2,ivy:2,oxb:2,d:"Becoming a licensed TEDx organiser is substantially stronger than giving a talk.",url:"https://www.ted.com/tedx/organize"},
+{f:"New Age & Cross-Field",n:"Emergent Ventures Youth Grant",t:"Program",g:2,na:true,countries:["ALL"],dl:"Rolling",dlm:0,sat:1,ivy:2,oxb:2,d:"Tyler Cowen's fast grants for original ideas in tech, policy, or culture. Open globally.",url:"https://www.mercatus.org/emergent-ventures"},
+{f:"New Age & Cross-Field",n:"International Geography Olympiad (iGeo)",t:"Competition",g:1,na:false,countries:["ALL"],dl:"National varies / Aug",dlm:7,sat:1,ivy:1,oxb:1,d:"International olympiad in geography combining fieldwork, data analysis, physical geography.",url:"https://www.geoolympiad.org"},
+{f:"New Age & Cross-Field",n:"International Young Physicists' Tournament (IYPT)",t:"Competition",g:1,na:false,countries:["ALL"],dl:"National varies / Jul",dlm:10,sat:1,ivy:1,oxb:1,d:"Physics World Cup — teams present solutions to 17 open physics problems. Combines research + oral defense.",url:"https://iypt.org"},
+{f:"New Age & Cross-Field",n:"Polygence / Lumiere → Peer-Reviewed Publication",t:"Program",g:3,na:true,countries:["ALL"],dl:"Rolling",dlm:0,sat:4,ivy:3,oxb:3,d:"Mentored research platforms. Value is entirely in the peer-reviewed published output.",url:"https://www.polygence.org",note:"Platform alone = Grade 4. Platform + JEI/domain journal publication = Grade 2."},
+];
+const JOURNALS=[
+// T1 — ELITE HS (AO-recognised)
+{n:"Journal of Emerging Investigators",abbr:"JEI",tier:1,subjects:"Biology, Chemistry, Physics, Environmental Science",fields:["Natural Sciences","Medicine & Neuroscience","Environmental Science"],cost:"Free",costNum:0,acceptance:"~25%",turnaround:"7–8 months",indexed:"Google Scholar",ivyRec:1,oxbRec:2,openTo:"HS students globally",accepts:"Original hypothesis-driven research only — no lit reviews",blind:"Single-blind (grad student reviewers)",predatory:false,url:"https://www.emerginginvestigators.org",note:"Harvard graduate student reviewers. The gold standard for HS life sciences. Every Ivy AO recognises this. Long turnaround — plan 8 months ahead."},
+{n:"The Concord Review",abbr:"TCR",tier:1,subjects:"History (all periods, all regions)",fields:["Humanities & Writing","Social Sciences & Economics"],cost:"~$40",costNum:40,acceptance:"~5%",turnaround:"3–5 months (quarterly)",indexed:"Library catalogues internationally",ivyRec:1,oxbRec:1,openTo:"HS students globally (38 countries)",accepts:"History research essays 5,000–10,000 words, original thesis required",blind:"Editorial review",predatory:false,url:"https://www.tcr.org",note:"Founded 1987. The only journal dedicated to HS history papers. Every Ivy and Oxbridge AO recognises this. Strongest humanities publication signal available."},
+{n:"Columbia Junior Science Journal",abbr:"CJSJ",tier:1,subjects:"Natural sciences, engineering, social sciences",fields:["Natural Sciences","Engineering & Robotics","Medicine & Neuroscience"],cost:"Free",costNum:0,acceptance:"~20%",turnaround:"3–5 months",indexed:"Google Scholar",ivyRec:1,oxbRec:2,openTo:"HS students globally",accepts:"Original research, review articles",blind:"Double-blind (Columbia undergrad editorial board)",predatory:false,url:"https://www.columbiajsj.com",note:"Run by Columbia University undergraduates. Columbia branding + selectivity makes this highly credible. Strong for STEM research with social science angles."},
+{n:"Voices in Bioethics",abbr:"VIB",tier:1,subjects:"Bioethics, medical ethics, policy, philosophy of medicine",fields:["Medicine & Neuroscience","Law, Policy & Government","Humanities & Writing"],cost:"Free",costNum:0,acceptance:"~20%",turnaround:"2–4 months",indexed:"Columbia Libraries, Google Scholar",ivyRec:1,oxbRec:2,openTo:"HS and undergraduate students",accepts:"Essays, commentary, research in bioethics",blind:"Editorial (Columbia Law School faculty oversight)",predatory:false,url:"https://voicesinbioethics.net",note:"Columbia Law School-affiliated. Powerful for pre-med + philosophy + law applicants. Low HS saturation in this niche."},
+{n:"Young Scientists Journal",abbr:"YSJ",tier:1,subjects:"All STEM disciplines",fields:["Natural Sciences","Medicine & Neuroscience","Computer Science & AI"],cost:"Free",costNum:0,acceptance:"~30%",turnaround:"2–4 months",indexed:"Google Scholar, ISSN registered",ivyRec:2,oxbRec:2,openTo:"Students aged 12–20 globally",accepts:"Original research, reviews, blog articles",blind:"Peer review by students + academics",predatory:false,url:"https://www.ysjournal.com",note:"World's only international peer-reviewed science journal entirely run by and for students. Founded 2006 at The King's School Canterbury. Strong credibility in UK."},
+{n:"Harvard International Review",abbr:"HIR",tier:1,subjects:"International affairs, politics, economics, policy",fields:["Social Sciences & Economics","Law, Policy & Government","Humanities & Writing"],cost:"Free",costNum:0,acceptance:"~15%",turnaround:"3–5 months",indexed:"Not Scopus (prestige-based)",ivyRec:1,oxbRec:2,openTo:"HS and undergraduate students",accepts:"Policy essays, analytical pieces, opinion",blind:"Student editorial board (Harvard undergrads)",predatory:false,url:"https://hir.harvard.edu",note:"Harvard student-run. Published in a Harvard journal is immediately recognisable. Particularly strong for policy and international relations applicants."},
+{n:"Polyphony Lit",abbr:"PLit",tier:1,subjects:"Poetry, fiction, creative nonfiction",fields:["Humanities & Writing","Visual Arts & Music"],cost:"Free",costNum:0,acceptance:"~20%",turnaround:"2–4 months",indexed:"Not indexed (literary credibility)",ivyRec:2,oxbRec:2,openTo:"HS students globally",accepts:"Poetry, fiction, creative nonfiction",blind:"Peer-reviewed by student editors (300+ schools)",predatory:false,url:"https://polyphonylit.org",note:"Peer-review by student editors from 300+ schools globally is what creates the signal, not indexing. Publication here + Concord Review = strong dual writing portfolio."},
+// T2 — STRONG HS
+{n:"Journal of High School Science",abbr:"JHSS",tier:2,subjects:"STEM, STEAM (all subjects)",fields:["Natural Sciences","Engineering & Robotics","Computer Science & AI","Mathematics"],cost:"$35",costNum:35,acceptance:"~30%",turnaround:"3–4 months (quarterly)",indexed:"Google Scholar, ISSN",ivyRec:2,oxbRec:2,openTo:"HS students",accepts:"Original research, review articles, STEAM projects",blind:"Single-blind (science professional reviewers)",predatory:false,url:"https://jhss.scholasticahq.com",note:"Strong editorial board of science professionals. Good for STEAM projects that span multiple disciplines."},
+{n:"International Journal of High School Research",abbr:"IJHSR",tier:2,subjects:"All STEM, behavioural and social sciences",fields:["Natural Sciences","Social Sciences & Economics","Engineering & Robotics"],cost:"Free",costNum:0,acceptance:"~40%",turnaround:"2–4 months",indexed:"EBSCO, Google Scholar",ivyRec:2,oxbRec:2,openTo:"HS students globally",accepts:"Original research, review articles",blind:"Single-blind",predatory:false,url:"https://ijhsr.terrajournals.org",note:"EBSCO indexing makes this searchable in major library databases."},
+{n:"Journal of Student Research",abbr:"JSR",tier:2,subjects:"All disciplines (multidisciplinary)",fields:["Natural Sciences","Social Sciences & Economics","Medicine & Neuroscience"],cost:"~$50",costNum:50,acceptance:"~40%",turnaround:"3–6 months",indexed:"Google Scholar, ISSN",ivyRec:2,oxbRec:2,openTo:"HS, undergraduate, graduate",accepts:"Research articles, case studies, AP/IB research projects",blind:"Double-blind",predatory:false,url:"https://www.jofsr.org",note:"One of the few journals explicitly accepting AP/IB research projects."},
+{n:"Young Researcher",abbr:"YR",tier:2,subjects:"Social sciences, humanities, physical sciences",fields:["Natural Sciences","Social Sciences & Economics","Humanities & Writing","Mathematics"],cost:"Free",costNum:0,acceptance:"~30%",turnaround:"2–5 months",indexed:"Google Scholar",ivyRec:2,oxbRec:2,openTo:"Secondary school students globally",accepts:"Original research, review articles",blind:"Peer-reviewed by student editors + academic researchers",predatory:false,url:"https://youngresearcher.org"},
+{n:"Oxford Journal of Student Scholarship",abbr:"OJSS",tier:2,subjects:"All academic fields",fields:["Natural Sciences","Social Sciences & Economics","Humanities & Writing","Engineering & Robotics"],cost:"Free",costNum:0,acceptance:"40–50%",turnaround:"2–4 months",indexed:"Google Scholar",ivyRec:2,oxbRec:2,openTo:"HS and undergraduate students",accepts:"Original research, reviews, interdisciplinary work",blind:"Double-blind with detailed reviewer feedback",predatory:false,url:"https://ojss.web.ox.ac.uk",note:"Oxford-affiliated name carries recognition. Emphasis on detailed reviewer feedback — valuable for developing research writing skills."},
+{n:"Columbia Undergraduate Law Review (HS Essays)",abbr:"CULR",tier:2,subjects:"Law, policy, legal analysis",fields:["Law, Policy & Government","Social Sciences & Economics"],cost:"Free",costNum:0,acceptance:"~20%",turnaround:"2–4 months",indexed:"HeinOnline, Google Scholar",ivyRec:1,oxbRec:2,openTo:"HS and undergraduate students",accepts:"Legal analysis essays, policy memos",blind:"Student editorial board (Columbia undergrads)",predatory:false,url:"https://www.columbialawreview.org",note:"Publishing in a Columbia law journal is a direct institutional signal for Ivy AOs. Strong for pre-law profiles."},
+{n:"Curieux Academic Journal",abbr:"CAJ",tier:2,subjects:"All disciplines",fields:["Natural Sciences","Social Sciences & Economics","Mathematics","Humanities & Writing"],cost:"Free",costNum:0,acceptance:"~25%",turnaround:"1–3 months",indexed:"Google Scholar",ivyRec:2,oxbRec:3,openTo:"HS students globally",accepts:"Original research, reviews, essays",blind:"Peer review",predatory:false,url:"https://www.curieux.us"},
+{n:"Stanford Undergraduate Research Journal",abbr:"SURJ",tier:2,subjects:"All disciplines",fields:["Natural Sciences","Social Sciences & Economics","Humanities & Writing","Engineering & Robotics","Mathematics"],cost:"Free",costNum:0,acceptance:"~30%",turnaround:"3–5 months",indexed:"Google Scholar",ivyRec:2,oxbRec:2,openTo:"HS and undergraduate students (verify current eligibility)",accepts:"Original research and review articles",blind:"Peer review",predatory:false,url:"https://surj.stanford.edu",note:"Stanford-branded student journal. Verify current HS submission eligibility on their website."},
+{n:"Journal of Youth in Science",abbr:"JYS",tier:2,subjects:"STEM disciplines",fields:["Natural Sciences","Engineering & Robotics","Medicine & Neuroscience"],cost:"Free",costNum:0,acceptance:"~35%",turnaround:"2–4 months",indexed:"Google Scholar",ivyRec:2,oxbRec:3,openTo:"Students under 25",accepts:"Original research, reviews",blind:"Peer review",predatory:false,url:"https://www.jysinc.org"},
+{n:"Research Archive of Rising Scholars",abbr:"RARS",tier:2,subjects:"Multidisciplinary",fields:["Natural Sciences","Social Sciences & Economics","Humanities & Writing","Mathematics"],cost:"Free",costNum:0,acceptance:"~35%",turnaround:"1–3 months",indexed:"Google Scholar",ivyRec:2,oxbRec:3,openTo:"HS students globally",accepts:"Original research, literature reviews",blind:"Peer review",predatory:false,url:"https://www.risingscholars.org"},
+// T3 — SCOPUS/WoS INDEXED (PI co-authorship required for HS)
+{n:"PLOS ONE",abbr:"PLOS ONE",tier:3,subjects:"All sciences and social sciences",fields:["Natural Sciences","Medicine & Neuroscience","Environmental Science","Social Sciences & Economics"],cost:"$1,350 APC",costNum:1350,acceptance:"~70%",turnaround:"3–6 months",indexed:"Scopus Q1, PubMed, WoS",ivyRec:2,oxbRec:2,openTo:"All researchers (PI co-authorship required for HS)",accepts:"Original research (scientific soundness criterion)",blind:"Single-blind",predatory:false,url:"https://journals.plos.org/plosone",note:"Q1 Scopus. PI typically covers APC. Accepts on soundness not novelty — good for HS students with genuine methods. Co-authorship with PI = Summa-level signal."},
+{n:"Scientific Reports (Nature Portfolio)",abbr:"Sci Rep",tier:3,subjects:"Natural sciences, engineering, medicine",fields:["Natural Sciences","Medicine & Neuroscience","Engineering & Robotics"],cost:"$1,990 APC",costNum:1990,acceptance:"~55%",turnaround:"3–5 months",indexed:"Scopus Q1, WoS, PubMed",ivyRec:2,oxbRec:2,openTo:"All researchers (PI co-authorship recommended)",accepts:"Original research",blind:"Single-blind",predatory:false,url:"https://www.nature.com/srep",note:"Nature-branded — most recognisable branding in science publishing. Q1 Scopus. 'Nature' in the authorship line is immediately recognisable by any AO."},
+{n:"Frontiers in Psychology",abbr:"Front.Psychol.",tier:3,subjects:"All sub-fields of psychology and neuroscience",fields:["Medicine & Neuroscience","Social Sciences & Economics"],cost:"~$1,200 APC",costNum:1200,acceptance:"~60%",turnaround:"3–6 months",indexed:"Scopus Q2, PubMed",ivyRec:2,oxbRec:2,openTo:"All researchers",accepts:"Original research, reviews, methods papers",blind:"Open review",predatory:false,url:"https://www.frontiersin.org/journals/psychology"},
+{n:"Frontiers in Neuroscience",abbr:"Front.Neurosci.",tier:3,subjects:"Neuroscience (all sub-fields)",fields:["Medicine & Neuroscience","Natural Sciences"],cost:"~$1,200 APC",costNum:1200,acceptance:"~60%",turnaround:"3–6 months",indexed:"Scopus Q2, PubMed, WoS",ivyRec:2,oxbRec:2,openTo:"All researchers",accepts:"Original research, reviews",blind:"Open review",predatory:false,url:"https://www.frontiersin.org/journals/neuroscience"},
+{n:"Frontiers in Education",abbr:"Front.Educ.",tier:3,subjects:"Education research, learning sciences, STEM education",fields:["Social Sciences & Economics","New Age & Cross-Field"],cost:"~$1,200 APC",costNum:1200,acceptance:"~60%",turnaround:"4–8 months",indexed:"Scopus Q2, WoS ESCI",ivyRec:2,oxbRec:2,openTo:"All researchers",accepts:"Original research, policy commentary",blind:"Open review",predatory:false,url:"https://www.frontiersin.org/journals/education"},
+{n:"Frontiers in Ecology and Evolution",abbr:"Front.EcolEvol.",tier:3,subjects:"Ecology, evolutionary biology, conservation",fields:["Environmental Science","Natural Sciences"],cost:"~$1,200 APC",costNum:1200,acceptance:"~55%",turnaround:"3–6 months",indexed:"Scopus Q2",ivyRec:2,oxbRec:2,openTo:"All researchers",accepts:"Original research, reviews",blind:"Open review",predatory:false,url:"https://www.frontiersin.org/journals/ecology-and-evolution"},
+{n:"MDPI Mathematics",abbr:"Mathematics",tier:3,subjects:"Pure and applied mathematics",fields:["Mathematics","Computer Science & AI"],cost:"~$1,800 APC",costNum:1800,acceptance:"~50%",turnaround:"4–8 weeks",indexed:"Scopus Q2, WoS",ivyRec:2,oxbRec:2,openTo:"All researchers",accepts:"Original research, reviews",blind:"Single-blind",predatory:false,url:"https://www.mdpi.com/journal/mathematics",note:"Rapid turnaround. Good for applied math results from students working with mentors. Only submit genuine research."},
+{n:"MDPI Algorithms",abbr:"Algorithms",tier:3,subjects:"Algorithms, computational complexity, machine learning",fields:["Computer Science & AI","Mathematics"],cost:"~$1,600 APC",costNum:1600,acceptance:"~50%",turnaround:"4–8 weeks",indexed:"Scopus Q2",ivyRec:2,oxbRec:2,openTo:"All researchers",accepts:"Original research",blind:"Single-blind",predatory:false,url:"https://www.mdpi.com/journal/algorithms"},
+{n:"MDPI Sustainability",abbr:"Sustainability",tier:3,subjects:"Sustainability, environmental management, green economy",fields:["Environmental Science","Social Sciences & Economics","Business & Entrepreneurship"],cost:"~$2,200 APC",costNum:2200,acceptance:"~55%",turnaround:"4–8 weeks",indexed:"Scopus Q2",ivyRec:2,oxbRec:2,openTo:"All researchers",accepts:"Original research, reviews",blind:"Single-blind",predatory:false,url:"https://www.mdpi.com/journal/sustainability"},
+{n:"Journal of Open Source Software",abbr:"JOSS",tier:3,subjects:"Open-source software of scientific interest",fields:["Computer Science & AI","Natural Sciences","Mathematics"],cost:"Free",costNum:0,acceptance:"~70%",turnaround:"1–4 months",indexed:"Scopus Q1, DOAJ, WoS",ivyRec:2,oxbRec:2,openTo:"Any software author (HS students qualify)",accepts:"Peer-reviewed software papers (must have real documented codebase)",blind:"Open review (all reviews public on GitHub)",predatory:false,url:"https://joss.theoj.org",note:"FREE and Scopus Q1 — extremely rare combination. CS students maintaining a genuine OSS tool (500+ users) + JOSS paper = very strong signal verifiable instantly."},
+{n:"IEEE Access",abbr:"IEEE Access",tier:3,subjects:"Engineering, computer science, physical sciences",fields:["Computer Science & AI","Engineering & Robotics","Natural Sciences"],cost:"$1,395 APC",costNum:1395,acceptance:"~60%",turnaround:"2–4 months",indexed:"Scopus Q1, WoS",ivyRec:2,oxbRec:2,openTo:"All researchers (PI co-authorship recommended for HS)",accepts:"Original research",blind:"Single-blind",predatory:false,url:"https://ieeeaccess.ieee.org",note:"IEEE branding is highly recognisable for engineering and CS applicants. Any AO seeing 'IEEE' understands the quality bar immediately."},
+{n:"PeerJ",abbr:"PeerJ",tier:3,subjects:"Biology, medicine, life sciences, computer science",fields:["Natural Sciences","Medicine & Neuroscience","Computer Science & AI"],cost:"$1,095–$1,195 APC",costNum:1095,acceptance:"~60%",turnaround:"4–8 weeks",indexed:"Scopus Q2, PubMed",ivyRec:2,oxbRec:2,openTo:"All researchers",accepts:"Original research",blind:"Single-blind",predatory:false,url:"https://peerj.com"},
+{n:"Heliyon (Elsevier)",abbr:"Heliyon",tier:3,subjects:"All scientific disciplines",fields:["Natural Sciences","Medicine & Neuroscience","Social Sciences & Economics","Engineering & Robotics"],cost:"~$1,600 APC",costNum:1600,acceptance:"~65%",turnaround:"3–6 months",indexed:"Scopus Q2, WoS, PubMed",ivyRec:2,oxbRec:2,openTo:"All researchers",accepts:"Original research (soundness criterion only)",blind:"Single-blind",predatory:false,url:"https://www.cell.com/heliyon",note:"Elsevier-branded. Like PLOS ONE, judges on scientific soundness not novelty. Good for students with solid research from lab placements."},
+{n:"BMC Research Notes",abbr:"BMC RN",tier:3,subjects:"Medicine, biology, life sciences",fields:["Medicine & Neuroscience","Natural Sciences"],cost:"~$900 APC",costNum:900,acceptance:"~70%",turnaround:"4–8 weeks",indexed:"Scopus Q2, PubMed, WoS",ivyRec:2,oxbRec:2,openTo:"All researchers",accepts:"Short research notes, data notes, case studies",blind:"Single-blind",predatory:false,url:"https://bmcresnotes.biomedcentral.com",note:"Lower cost than most BioMed Central journals. Good for focused findings from lab placements."},
+{n:"SAGE Open",abbr:"SAGE Open",tier:3,subjects:"Social sciences, humanities, STEM",fields:["Social Sciences & Economics","Humanities & Writing","Law, Policy & Government"],cost:"~$695 APC",costNum:695,acceptance:"~55%",turnaround:"3–5 months",indexed:"Scopus Q3, WoS ESCI",ivyRec:2,oxbRec:2,openTo:"All researchers",accepts:"Original research, reviews",blind:"Double-blind",predatory:false,url:"https://journals.sagepub.com/home/sgo",note:"SAGE brand is credible and widely recognised. Good for social science and economics research at lowest APC among indexed journals."},
+{n:"International Journal of STEM Education",abbr:"IJ-STEM-Ed",tier:3,subjects:"STEM education research, curriculum, pedagogy",fields:["Natural Sciences","Social Sciences & Economics","New Age & Cross-Field"],cost:"~$1,700 APC",costNum:1700,acceptance:"~40%",turnaround:"3–6 months",indexed:"Scopus Q1, ERIC, WoS",ivyRec:2,oxbRec:2,openTo:"All researchers",accepts:"Original research in STEM education",blind:"Double-blind",predatory:false,url:"https://stemeducationjournal.springeropen.com",note:"Q1 Scopus — highest prestige among STEM education journals. Good for students who have designed and evaluated educational programs."},
+{n:"SN Computer Science (Springer)",abbr:"SN CS",tier:3,subjects:"Computer science, informatics",fields:["Computer Science & AI","Mathematics"],cost:"~$1,590 APC",costNum:1590,acceptance:"~50%",turnaround:"3–6 months",indexed:"Scopus Q2, WoS ESCI",ivyRec:2,oxbRec:2,openTo:"All researchers",accepts:"Original research, survey articles",blind:"Single-blind",predatory:false,url:"https://link.springer.com/journal/42979",note:"Springer branding carries weight for CS applicants working on algorithms, ML, or HCI."},
+// T4 — PREPRINT PLATFORMS
+{n:"arXiv",abbr:"arXiv",tier:4,subjects:"Mathematics, CS, physics, quantitative biology, statistics, economics",fields:["Mathematics","Computer Science & AI","Natural Sciences","Engineering & Robotics"],cost:"Free",costNum:0,acceptance:"Moderated (screened, not rejected)",turnaround:"1–2 days",indexed:"Permanently citable (arXiv ID)",ivyRec:2,oxbRec:2,openTo:"All researchers (new users need endorsement from existing arXiv author)",accepts:"Research papers in supported subject areas",blind:"Not peer-reviewed",predatory:false,url:"https://arxiv.org",note:"Gold standard preprint for STEM. Permanently citable, date-stamped, instantly verifiable. Co-authorship with PI elevates enormously. An arXiv paper with downloads signals real intellectual seriousness."},
+{n:"bioRxiv",abbr:"bioRxiv",tier:4,subjects:"Biology, life sciences (all sub-fields)",fields:["Natural Sciences","Medicine & Neuroscience","Environmental Science"],cost:"Free",costNum:0,acceptance:"Moderated",turnaround:"1–3 days",indexed:"PubMed links, Google Scholar",ivyRec:2,oxbRec:2,openTo:"All researchers",accepts:"Original research in life sciences",blind:"Not peer-reviewed",predatory:false,url:"https://www.biorxiv.org",note:"Standard pre-publication deposit for biology. Co-authorship with university PI = very strong admissions signal. Links to eventual journal publication."},
+{n:"medRxiv",abbr:"medRxiv",tier:4,subjects:"Medicine, clinical research, epidemiology, public health",fields:["Medicine & Neuroscience","Natural Sciences"],cost:"Free",costNum:0,acceptance:"Moderated",turnaround:"1–3 days",indexed:"Google Scholar, links to PubMed",ivyRec:2,oxbRec:2,openTo:"All researchers (co-authorship with licensed clinician recommended)",accepts:"Clinical and pre-clinical research",blind:"Not peer-reviewed",predatory:false,url:"https://www.medrxiv.org"},
+{n:"SSRN",abbr:"SSRN",tier:4,subjects:"Economics, law, finance, management, social sciences, humanities",fields:["Social Sciences & Economics","Law, Policy & Government","Humanities & Writing","Business & Entrepreneurship"],cost:"Free",costNum:0,acceptance:"No gatekeeping",turnaround:"2–5 days",indexed:"Google Scholar; download stats publicly visible",ivyRec:2,oxbRec:2,openTo:"All researchers",accepts:"Working papers, research papers, essays",blind:"Not peer-reviewed",predatory:false,url:"https://www.ssrn.com",note:"Most widely-used preprint for economics and law. Download count is publicly visible — 500+ downloads on a HS paper is a meaningful engagement signal."},
+{n:"ChemRxiv",abbr:"ChemRxiv",tier:4,subjects:"Chemistry, chemical biology, materials science",fields:["Natural Sciences"],cost:"Free",costNum:0,acceptance:"Moderated",turnaround:"2–5 days",indexed:"ACS/RSC links, Google Scholar",ivyRec:2,oxbRec:2,openTo:"All researchers",accepts:"Original chemistry research",blind:"Not peer-reviewed",predatory:false,url:"https://chemrxiv.org"},
+{n:"PsyArXiv",abbr:"PsyArXiv",tier:4,subjects:"Psychology, cognitive science, social neuroscience",fields:["Medicine & Neuroscience","Social Sciences & Economics"],cost:"Free",costNum:0,acceptance:"Open (OSF moderated)",turnaround:"1–2 days",indexed:"Google Scholar, APA links",ivyRec:2,oxbRec:2,openTo:"All researchers",accepts:"Psychological research, preregistrations",blind:"Not peer-reviewed",predatory:false,url:"https://psyarxiv.com"},
+{n:"SocArXiv",abbr:"SocArXiv",tier:4,subjects:"Social sciences, humanities, education, law",fields:["Social Sciences & Economics","Humanities & Writing","Law, Policy & Government"],cost:"Free",costNum:0,acceptance:"Open (OSF moderated)",turnaround:"1–2 days",indexed:"Google Scholar",ivyRec:2,oxbRec:2,openTo:"All researchers",accepts:"Social science and humanities research",blind:"Not peer-reviewed",predatory:false,url:"https://osf.io/preprints/socarxiv"},
+{n:"EarthArXiv",abbr:"EarthArXiv",tier:4,subjects:"Earth sciences, geology, oceanography, atmospheric science",fields:["Environmental Science","Natural Sciences"],cost:"Free",costNum:0,acceptance:"Moderated",turnaround:"1–3 days",indexed:"Google Scholar",ivyRec:2,oxbRec:2,openTo:"All researchers",accepts:"Earth science research",blind:"Not peer-reviewed",predatory:false,url:"https://eartharxiv.org"},
+{n:"Zenodo (CERN)",abbr:"Zenodo",tier:4,subjects:"Any research output — data, code, papers, datasets",fields:["Natural Sciences","Computer Science & AI","Engineering & Robotics","Mathematics","Environmental Science"],cost:"Free",costNum:0,acceptance:"Open (moderation for appropriateness)",turnaround:"Immediate",indexed:"DOI assigned (permanent), Google Scholar",ivyRec:2,oxbRec:2,openTo:"All researchers",accepts:"Any scholarly output including datasets and code",blind:"Not peer-reviewed",predatory:false,url:"https://zenodo.org",note:"CERN-operated. Free DOI for any research output. Good for depositing code and datasets. Creates verifiable permanent record of original work."},
+{n:"PhilPapers",abbr:"PhilPapers",tier:4,subjects:"Philosophy, logic, ethics, metaphysics, philosophy of mind",fields:["Humanities & Writing","Law, Policy & Government"],cost:"Free",costNum:0,acceptance:"Moderated index",turnaround:"2–5 days",indexed:"PhilPapers specialist index",ivyRec:2,oxbRec:2,openTo:"All researchers",accepts:"Philosophy papers",blind:"Not peer-reviewed",predatory:false,url:"https://philpapers.org",note:"Standard repository for philosophy papers. For HS students writing in ethics/logic/philosophy: uploading here signals familiarity with academic norms. Very strong for Oxbridge philosophy applicants."},
+{n:"OSF Preprints",abbr:"OSF",tier:4,subjects:"All disciplines",fields:["Natural Sciences","Social Sciences & Economics","Medicine & Neuroscience","Humanities & Writing"],cost:"Free",costNum:0,acceptance:"Open",turnaround:"Immediate",indexed:"Google Scholar",ivyRec:2,oxbRec:2,openTo:"All researchers",accepts:"Any scholarly output",blind:"Not peer-reviewed",predatory:false,url:"https://osf.io/preprints/",note:"Good for preregistering research before conducting it — creates a date-stamped public record proving your research plan predates your results."},
+];
+
+// Constants
+const GRADE={1:{s:"SUMMA",c:"#D4AF37",bg:"rgba(212,175,55,0.09)",br:"rgba(212,175,55,0.38)"},2:{s:"MAGNA",c:"#7EB8D4",bg:"rgba(126,184,212,0.09)",br:"rgba(126,184,212,0.32)"},3:{s:"CUM LAUDE",c:"#6DDDB5",bg:"rgba(109,221,181,0.08)",br:"rgba(109,221,181,0.28)"},4:{s:"ADEQUATE",c:"#9CA3AF",bg:"rgba(156,163,175,0.07)",br:"rgba(156,163,175,0.22)"}};
+const TCOLOR={Competition:"#F472B6",Journal:"#34D399",Program:"#FBBF24",Organization:"#A78BFA",Platform:"#60A5FA"};
+const FICON={"Mathematics":"∑","Computer Science & AI":"⌨","Natural Sciences":"⚗","Social Sciences & Economics":"📊","Humanities & Writing":"✍","Engineering & Robotics":"⚙","Business & Entrepreneurship":"💼","Visual Arts & Music":"🎨","Environmental Science":"🌿","Medicine & Neuroscience":"🧠","Law, Policy & Government":"⚖","New Age & Cross-Field":"⚡"};
+const COUNTRIES=[{id:"ALL",label:"All Countries",flag:"🌐",cls:"c-all",color:"#6DDDB5",note:""},{id:"US",label:"United States",flag:"🇺🇸",cls:"c-us",color:"#E85B5B",note:"US + UK colleges"},{id:"IN",label:"India",flag:"🇮🇳",cls:"c-in",color:"#FF9933",note:"US + UK colleges"},{id:"SG",label:"Singapore",flag:"🇸🇬",cls:"c-sg",color:"#E03434",note:"US + UK colleges"},{id:"UK",label:"United Kingdom",flag:"🇬🇧",cls:"c-uk",color:"#4A7FCB",note:"US + UK colleges"}];
+const ALL_FIELDS=["all","Mathematics","Computer Science & AI","Natural Sciences","Social Sciences & Economics","Humanities & Writing","Engineering & Robotics","Business & Entrepreneurship","Visual Arts & Music","Environmental Science","Medicine & Neuroscience","Law, Policy & Government","New Age & Cross-Field"];
+const FLABELS={"all":"All Fields","Mathematics":"Mathematics","Computer Science & AI":"CS & AI","Natural Sciences":"Natural Sciences","Social Sciences & Economics":"Soc.Sci & Econ","Humanities & Writing":"Humanities","Engineering & Robotics":"Engineering","Business & Entrepreneurship":"Business","Visual Arts & Music":"Arts & Music","Environmental Science":"Environment","Medicine & Neuroscience":"Medicine","Law, Policy & Government":"Law & Policy","New Age & Cross-Field":"⚡ New Age"};
+const SAT_CFG={1:{l:"FRESH",c:"#4ADE80",bg:"rgba(74,222,128,0.07)",br:"rgba(74,222,128,0.28)"},2:{l:"LOW",c:"#A3E635",bg:"rgba(163,230,53,0.06)",br:"rgba(163,230,53,0.25)"},3:{l:"MOD",c:"#FBBF24",bg:"rgba(251,191,36,0.07)",br:"rgba(251,191,36,0.28)"},4:{l:"HIGH",c:"#F97316",bg:"rgba(249,115,22,0.07)",br:"rgba(249,115,22,0.28)"},5:{l:"SAT",c:"#EF4444",bg:"rgba(239,68,68,0.07)",br:"rgba(239,68,68,0.28)"}};
+const JTIER={1:{l:"T1 · ELITE HS",c:"#D4AF37",bg:"rgba(212,175,55,0.09)",br:"rgba(212,175,55,0.38)",desc:"Elite HS Journals — AOs recognise immediately."},2:{l:"T2 · STRONG HS",c:"#7EB8D4",bg:"rgba(126,184,212,0.09)",br:"rgba(126,184,212,0.32)",desc:"Strong HS Journals — Growing AO awareness."},3:{l:"T3 · SCOPUS",c:"#6DDDB5",bg:"rgba(109,221,181,0.08)",br:"rgba(109,221,181,0.28)",desc:"Scopus/WoS Indexed — PI co-authorship required. Highest possible publishing credential."},4:{l:"T4 · PREPRINT",c:"#A78BFA",bg:"rgba(167,139,250,0.08)",br:"rgba(167,139,250,0.28)",desc:"Preprint Platforms — Free, immediate, permanently citable. Verifiable in seconds."}};
+
+// State
+let S={country:"ALL",field:"all",type:"All",grade:"All",newAge:false,school:"All",search:"",expanded:null};
+let JS={tier:"All",field:"all",cost:"All",search:"",expanded:null};
+
+// Helpers
+const matchCountry=(o,c)=>c==="ALL"?true:(o.countries.includes("ALL")||o.countries.includes(c));
+const filtered=()=>DATA.filter(o=>{
+  if(!matchCountry(o,S.country))return false;
+  if(S.field!=="all"&&o.f!==S.field)return false;
+  if(S.type!=="All"&&o.t!==S.type)return false;
+  if(S.grade!=="All"&&o.g!==parseInt(S.grade))return false;
+  if(S.newAge&&!o.na)return false;
+  if(S.school==="ivy"&&o.ivy>2)return false;
+  if(S.school==="oxb"&&o.oxb>2)return false;
+  if(S.search){const q=S.search.toLowerCase();if(!o.n.toLowerCase().includes(q)&&!o.d.toLowerCase().includes(q)&&!o.f.toLowerCase().includes(q))return false;}
+  return true;
+});
+const filteredJournals=()=>JOURNALS.filter(j=>{
+  if(JS.tier!=="All"&&j.tier!==parseInt(JS.tier))return false;
+  if(JS.field!=="all"&&!j.fields.includes(JS.field))return false;
+  if(JS.cost==="free"&&j.costNum!==0)return false;
+  if(JS.cost==="paid"&&j.costNum===0)return false;
+  if(JS.search){const q=JS.search.toLowerCase();if(!j.n.toLowerCase().includes(q)&&!j.subjects.toLowerCase().includes(q)&&!(j.abbr||"").toLowerCase().includes(q))return false;}
+  return true;
+});
+
+// ===== THEME TOGGLE =====
+function toggleTheme() {
+  const html = document.documentElement;
+  const currentTheme = html.getAttribute('data-theme') || 'dark';
+  const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+  
+  html.setAttribute('data-theme', newTheme);
+  localStorage.setItem('theme', newTheme);
+  
+  const toggle = document.getElementById('theme-toggle');
+  toggle.textContent = newTheme === 'dark' ? '🌙' : '☀️';
+}
+
+function initTheme() {
+  const saved = localStorage.getItem('theme') || 'dark';
+  document.documentElement.setAttribute('data-theme', saved);
+  document.getElementById('theme-toggle').textContent = saved === 'dark' ? '🌙' : '☀️';
+}
+
+// Initialize theme on page load
+initTheme();
+
+// Tab switching
+function switchTab(t){
+  document.querySelectorAll(".tab-content").forEach(e=>e.classList.remove("active"));
+  document.querySelectorAll(".tab-btn").forEach(e=>e.classList.remove("active"));
+  document.getElementById("tab-"+t).classList.add("active");
+  const idx={db:0,pb:1,cal:2,sat:3,jrn:4}[t];
+  document.querySelectorAll(".tab-btn")[idx].classList.add("active");
+  if(t==="cal")renderCal();
+  if(t==="sat")renderSat();
+  if(t==="jrn")renderJournals();
+}
+
+// AO Recognition stars renderer
+function aoStars(val,color){
+  const max=3;const stars=[];
+  for(let i=1;i<=max;i++){stars.push(`<div class="ao-star" style="background:${i<=val?color:'rgba(255,255,255,0.07)'}"></div>`);}
+  return stars.join("");
+}
+
+// Saturation bar renderer
+function satBar(sat){
+  const cfg=SAT_CFG[sat];
+  const w=(sat/5)*100;
+  return`<div class="ao-sat"><div class="ao-sat-bar"><div class="ao-sat-fill" style="width:${w}%;background:${cfg.c}"></div></div><span class="ao-sat-lbl" style="color:${cfg.c};font-size:8px">${cfg.l}</span></div>`;
+}
+
+// DB RENDER
+function safeKey(s){let h=0;for(let i=0;i<s.length;i++){h=((h<<5)-h)+s.charCodeAt(i);h|=0;}return"k"+(h>>>0).toString(36);}
+function renderDB(){
+  S.search=document.getElementById("db-search").value;
+  const f=filtered();
+  document.getElementById("hdr-sub").textContent=DATA.length+" verified opportunities · US · India · Singapore · UK";
+  document.getElementById("hdr-stats").innerHTML=[1,2,3].map(g=>`<div style="text-align:center"><div style="font-size:19px;font-weight:600;font-family:'JetBrains Mono',monospace;color:${GRADE[g].c}">${DATA.filter(o=>o.g===g).length}</div><div style="font-size:7.5px;letter-spacing:.2em;color:var(--muted);text-transform:uppercase;font-family:'JetBrains Mono',monospace">${GRADE[g].s}</div></div>`).join("");
+  document.getElementById("country-row").innerHTML=COUNTRIES.map(c=>`<button class="cbtn ${c.cls} ${S.country===c.id?"active":""}" onclick="setC('${c.id}')"><span class="flag">${c.flag}</span><div><div class="cname">${c.label}</div>${c.note?`<div class="ctag">${c.note}</div>`:""}</div><span class="adot"></span></button>`).join("");
+  const types=["All","Competition","Journal","Program","Organization","Platform"];
+  const tClass={All:"",Competition:"tComp",Journal:"tJour",Program:"tProg",Organization:"tOrg",Platform:"tPlat"};
+  document.getElementById("db-filters").innerHTML=
+    types.map(t=>`<button class="fb ${tClass[t]} ${S.type===t?"active":""}" onclick="setF('type','${t}')">${t}</button>`).join("")+
+    `<div class="fdiv"></div>`+
+    ["All","1","2","3"].map(g=>`<button class="fb g${g} ${S.grade===g?"active":""}" onclick="setF('grade','${g}')">${g==="All"?"All Grades":"G"+g+" "+GRADE[parseInt(g)].s}</button>`).join("")+
+    `<div class="fdiv"></div>
+    <button class="fb sivy ${S.school==="ivy"?"active":""}" onclick="setF('school',S.school==='ivy'?'All':'ivy')">🏛 IVY STRONG</button>
+    <button class="fb soxb ${S.school==="oxb"?"active":""}" onclick="setF('school',S.school==='oxb'?'All':'oxb')">🎓 OXB STRONG</button>
+    <div class="fdiv"></div>
+    <button class="fb gna ${S.newAge?"active":""}" onclick="toggleNewAge()">⚡ NEW AGE ONLY</button>`;
+  document.getElementById("field-nav").innerHTML=ALL_FIELDS.map(fid=>{
+    const cnt=fid==="all"?f.length:f.filter(o=>o.f===fid).length;
+    return`<button class="fld-btn ${S.field===fid?"active":""}" onclick="setF('field','${fid}')">${FLABELS[fid]}<span class="fld-cnt">${cnt||""}</span></button>`;
+  }).join("");
+  document.getElementById("db-meta").textContent=`SHOWING ${f.length} OF ${DATA.length}`;
+  const cc=COUNTRIES.find(c=>c.id===S.country);
+  document.getElementById("db-cpills").innerHTML=S.country!=="ALL"?
+    `<div class="cpill" style="color:#6DDDB5;border-color:rgba(109,221,181,.22)">🌐 ${f.filter(o=>o.countries.includes("ALL")).length} Universal</div><div class="cpill" style="color:${cc.color};border-color:${cc.color}40">${cc.flag} ${f.filter(o=>!o.countries.includes("ALL")).length} ${cc.label}-specific</div>`:
+    "";
+  const grid=document.getElementById("db-grid"),nores=document.getElementById("db-nores");
+  if(!f.length){grid.innerHTML="";nores.style.display="block";return;}
+  nores.style.display="none";
+  grid.innerHTML=f.map(o=>{
+    const g=GRADE[o.g],key=safeKey(o.f+o.n),isOpen=S.expanded===key;
+    const tc=TCOLOR[o.t]||"#aaa",sat=SAT_CFG[o.sat];
+    const desc=isOpen?o.d:(o.d.length>110?o.d.slice(0,110)+"…":o.d);
+    const cLabel=o.countries.includes("ALL")?null:(o.countries.length===1?o.countries[0]:o.countries.join("+"));
+    return`<div class="card ${isOpen?"open":""}" onclick="toggleCard('${key}')">
+      <div class="gstripe" style="background:${g.c}"></div>
+      <div class="ctop">
+        <div class="cname">${o.n}</div>
+        <div class="cbadges">
+          <div class="gbadge" style="color:${g.c};background:${g.bg};border:1px solid ${g.br}">${o.g} · ${g.s}</div>
+          ${o.na?'<div class="nbadge">⚡ NEW AGE</div>':''}
+          ${cLabel?`<div class="gbadge" style="color:#9CA3AF;background:rgba(156,163,175,0.07);border:1px solid rgba(156,163,175,0.2)">${cLabel}</div>`:''}
+        </div>
+      </div>
+      <div class="cmeta">
+        <span class="ttag" style="color:${tc};border:1px solid ${tc}25">${o.t}</span>
+        <span class="ftag">${FICON[o.f]||""} ${o.f}</span>
+        ${o.dl?`<span class="ftag">📅 ${o.dl}</span>`:''}
+      </div>
+      <div class="cdesc">${desc}</div>
+      ${isOpen?`
+      <div class="ao-row">
+        <div class="ao-block">
+          <div class="ao-lbl">🏛 IVY Recognition</div>
+          <div class="ao-stars">${aoStars(4-o.ivy,"#C084FC")}</div>
+          <div style="font-size:8.5px;color:#9060C0;font-family:'JetBrains Mono',monospace">${["","Widely known","Informed AOs","Rarely known"][o.ivy]}</div>
+        </div>
+        <div class="ao-block">
+          <div class="ao-lbl">🎓 OXBRIDGE Recognition</div>
+          <div class="ao-stars">${aoStars(4-o.oxb,"#38BDF8")}</div>
+          <div style="font-size:8.5px;color:#2080B0;font-family:'JetBrains Mono',monospace">${["","Widely known","Informed AOs","Rarely known"][o.oxb]}</div>
+        </div>
+      </div>
+      <div class="ao-block" style="margin-bottom:8px">
+        <div class="ao-lbl" style="margin-bottom:4px">Pool Saturation</div>
+        ${satBar(o.sat)}
+      </div>
+      ${o.note?`<div class="anote"><span class="anlbl">AO INSIGHT</span>${o.note}</div>`:''}
+      <a class="lbtn" href="${o.url}" target="_blank" rel="noopener" onclick="event.stopPropagation()">↗ Official Site</a>
+      `:''}
+      <div class="cfoot">
+        <button class="exhint">${isOpen?"▲ collapse":"▼ expand"}</button>
+        <div class="sbadge" style="color:${sat.c};background:${sat.bg};border:1px solid ${sat.br}">● ${sat.l}</div>
+      </div>
+    </div>`;
+  }).join("");
+}
+
+function setC(c){S.country=c;S.expanded=null;renderDB();}
+function setF(k,v){S[k]=v;S.expanded=null;renderDB();}
+function toggleNewAge(){S.newAge=!S.newAge;S.expanded=null;renderDB();}
+function toggleCard(key){S.expanded=S.expanded===key?null:key;renderDB();}
+
+// JOURNALS RENDER
+function renderJournals(){
+  const f=filteredJournals();
+  document.getElementById("jrn-filters").innerHTML=
+    ["All","1","2","3","4"].map(t=>{
+      const jt=JTIER[parseInt(t)];
+      return`<button class="fb ${JS.tier===t?"active":""}" onclick="setJF('tier','${t}')" ${t!=="All"?`style="${JS.tier===t?`color:${jt.c};border-color:${jt.br};background:${jt.bg}`:""}"`:""}">${t==="All"?"All Tiers":jt.l}</button>`;
+    }).join("")+
+    `<div class="fdiv"></div>
+    <button class="fb ${JS.cost==="free"?"active":""}" onclick="setJF('cost',JS.cost==='free'?'All':'free')">💚 FREE ONLY</button>
+    <button class="fb ${JS.cost==="paid"?"active":""}" onclick="setJF('cost',JS.cost==='paid'?'All':'paid')">💰 PAID</button>`;
+  const jFields=["all",...new Set(JOURNALS.flatMap(j=>j.fields))].filter((v,i,a)=>a.indexOf(v)===i);
+  document.getElementById("jrn-field-nav").innerHTML=jFields.map(fid=>{
+    const cnt=fid==="all"?f.length:f.filter(j=>j.fields.includes(fid)).length;
+    return`<button class="fld-btn ${JS.field===fid?"active":""}" onclick="setJF('field','${fid}')">${FLABELS[fid]||fid}<span class="fld-cnt">${cnt||""}</span></button>`;
+  }).join("");
+  JS.search=document.getElementById("jrn-search").value;
+  document.getElementById("jrn-meta").textContent=`SHOWING ${f.length} OF ${JOURNALS.length} JOURNALS`;
+  const out=document.getElementById("jrn-output");
+  if(!f.length){out.innerHTML=`<div class="nores">No journals match your filters.</div>`;return;}
+  // Group by tier
+  const byTier={};
+  f.forEach(j=>{if(!byTier[j.tier])byTier[j.tier]=[]; byTier[j.tier].push(j);});
+  out.innerHTML=Object.keys(byTier).sort().map(t=>{
+    const jt=JTIER[parseInt(t)];
+    const items=byTier[t];
+    return`<div class="tier-band">
+      <div class="tier-hdr">
+        <div class="tier-title" style="color:${jt.c}">${jt.l}</div>
+        <div class="tier-desc">${jt.desc}</div>
+        <div class="tier-cnt">${items.length} journal${items.length!==1?"s":""}</div>
+      </div>
+      <div class="jrn-grid">
+        ${items.map(j=>{
+          const key=safeKey(j.n),isOpen=JS.expanded===key;
+          const costColor=j.costNum===0?"#4ADE80":j.costNum<500?"#FBBF24":"#F97316";
+          return`<div class="jcard ${isOpen?"open":""}" onclick="toggleJCard('${key}')">
+            <div class="jstripe" style="background:${jt.c}"></div>
+            <div class="jtop">
+              <div><div class="jname">${j.n}</div><div class="jabbr">${j.abbr}</div></div>
+              <div class="jbadges">
+                <div class="jbadge" style="color:${jt.c};background:${jt.bg};border:1px solid ${jt.br}">${jt.l}</div>
+                <div class="jbadge" style="color:${costColor};background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08)">${j.cost}</div>
+              </div>
+            </div>
+            <div class="jmeta">
+              ${j.fields.slice(0,3).map(fld=>`<span class="jtag">${FICON[fld]||""} ${FLABELS[fld]||fld}</span>`).join("")}
+            </div>
+            ${isOpen?`
+            <div class="jstats">
+              <div class="jstat"><div class="jstat-lbl">Acceptance</div><div class="jstat-val">${j.acceptance}</div></div>
+              <div class="jstat"><div class="jstat-lbl">Turnaround</div><div class="jstat-val" style="font-size:10px">${j.turnaround}</div></div>
+              <div class="jstat"><div class="jstat-lbl">Indexed</div><div class="jstat-val" style="font-size:9.5px">${j.indexed}</div></div>
+            </div>
+            <div class="jdesc"><strong style="color:#B0A880;font-size:11px">Accepts:</strong> ${j.accepts}</div>
+            <div class="jdesc" style="margin-top:5px"><strong style="color:#B0A880;font-size:11px">Open to:</strong> ${j.openTo}</div>
+            <div class="j-ao-row">
+              <div class="j-ao-block">
+                <div class="ao-lbl">🏛 IVY AO Awareness</div>
+                <div class="ao-stars">${aoStars(4-j.ivyRec,"#C084FC")}</div>
+              </div>
+              <div class="j-ao-block">
+                <div class="ao-lbl">🎓 OXB AO Awareness</div>
+                <div class="ao-stars">${aoStars(4-j.oxbRec,"#38BDF8")}</div>
+              </div>
+            </div>
+            ${j.note?`<div class="jnote"><span class="jnlbl">AO INSIGHT</span>${j.note}</div>`:''}
+            <a class="lbtn" href="${j.url}" target="_blank" rel="noopener" onclick="event.stopPropagation()">↗ Official Site</a>
+            `:`<div class="jdesc">${j.subjects.length>90?j.subjects.slice(0,90)+"…":j.subjects}</div>`}
+            <div class="jfoot">
+              <button class="exhint" style="color:#2A2820">${isOpen?"▲ collapse":"▼ expand"}</button>
+              <span style="font-family:'JetBrains Mono',monospace;font-size:8px;color:${j.blind&&j.blind.includes("Not")?"#6A6258":"#4ADE80"}">${j.blind&&j.blind.includes("Not peer")?"No peer review":j.blind&&j.blind.includes("Double")?"Double-blind":j.blind&&j.blind.includes("Single")?"Single-blind":j.blind&&j.blind.includes("Open")?"Open review":"Reviewed"}</span>
+            </div>
+          </div>`;
+        }).join("")}
+      </div>
+    </div>`;
+  }).join("");
+}
+function setJF(k,v){JS[k]=v;JS.expanded=null;renderJournals();}
+function toggleJCard(key){JS.expanded=JS.expanded===key?null:key;renderJournals();}
+
+// PROFILE BUILDER
+function initPB(){
+  const fields=["Mathematics","Computer Science & AI","Natural Sciences","Social Sciences & Economics","Humanities & Writing","Engineering & Robotics","Business & Entrepreneurship","Visual Arts & Music","Environmental Science","Medicine & Neuroscience","Law, Policy & Government"];
+  document.getElementById("pb-fields").innerHTML=fields.map(f=>`<button class="pb-chip" onclick="pbToggle(this,'pf')">${FICON[f]||""} ${f}</button>`).join("");
+  const creds=["National Olympiad","Research Publication","ISEF/Science Fair","Math Competition","Startup/Product","Debate TOC","Music/Arts Award","STEM Summer Program","None yet"];
+  document.getElementById("pb-creds").innerHTML=creds.map(c=>`<button class="pb-chip" onclick="pbToggle(this,'pc')">${c}</button>`).join("");
+}
+function pbToggle(el,g){el.classList.toggle("active");}
+function buildRoadmap(){
+  const grade=parseInt(document.getElementById("pb-grade").value);
+  const country=document.getElementById("pb-country").value;
+  const target=document.getElementById("pb-target").value;
+  const fields=[...document.getElementById("pb-fields").querySelectorAll(".active")].map(e=>e.textContent.replace(/^[^\w]+/,"").trim());
+  if(!fields.length){alert("Please select at least one field.");return;}
+  const years=[];
+  for(let g=grade;g<=12;g++)years.push(g);
+  const countryData=COUNTRIES.find(c=>c.id===country);
+  const gradeDescs={9:"Foundation year: establish habits, identify 1–2 fields, enter accessible competitions",10:"Acceleration year: win first verifiable credential, start research pathway",11:"Peak validation year: win something remarkable, submit research for review",12:"Consolidation year: wrap ongoing projects, application materials, awards finalization"};
+  const gradeItems={};
+  years.forEach(g=>{gradeItems[g]=DATA.filter(o=>{
+    if(!matchCountry(o,country)&&!o.countries.includes("ALL"))return false;
+    if(o.g>3)return false;
+    if(target==="ivy"&&o.ivy>2)return false;
+    if(target==="oxb"&&o.oxb>2)return false;
+    const fieldMatch=fields.some(f=>o.f===f||(f.includes(o.f.split(" ")[0])));
+    return fieldMatch;
+  }).sort((a,b)=>a.g-b.g).slice(0,6);});
+  document.getElementById("roadmap-output").innerHTML=`
+    <div style="margin-top:28px;padding-top:24px;border-top:1px solid var(--border)">
+      <div class="eyebrow" style="margin-bottom:12px">Generated Roadmap · ${countryData.flag} ${country} · ${target==="both"?"Ivy + Oxbridge":target==="ivy"?"Ivy League":"Oxbridge"}</div>
+      ${years.map(g=>`
+      <div class="rm-year">
+        <div class="rm-year-hdr">
+          <div class="rm-grade">Grade ${g}</div>
+          <div class="rm-desc">${gradeDescs[g]||""}</div>
+        </div>
+        <div class="rm-cards">
+          ${(gradeItems[g]||[]).map(o=>{const gr=GRADE[o.g];return`
+          <div class="rm-card">
+            <div class="rm-stripe" style="background:${gr.c}"></div>
+            <div class="rm-name">${o.n}</div>
+            <div class="rm-why">${o.d.slice(0,100)}…</div>
+            <div class="rm-meta">
+              <span class="rm-mini" style="color:${gr.c};background:${gr.bg};border:1px solid ${gr.br}">G${o.g} ${gr.s}</span>
+              <span class="rm-mini" style="color:${TCOLOR[o.t]};background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07)">${o.t}</span>
+            </div>
+            <a href="${o.url}" target="_blank" rel="noopener" style="font-family:'JetBrains Mono',monospace;font-size:8.5px;color:#60A5FA;margin-top:5px;display:inline-block">↗ Official Site</a>
+          </div>`;}).join("")}
+        </div>
+      </div>`).join("")}
+    </div>`;
+}
+
+// CALENDAR
+function renderCal(){
+  const now=new Date();
+  const months=[];
+  for(let i=0;i<12;i++){const d=new Date(now.getFullYear(),now.getMonth()+i,1);months.push({y:d.getFullYear(),m:d.getMonth()});}
+  const MNAMES=["January","February","March","April","May","June","July","August","September","October","November","December"];
+  const calData=DATA.filter(o=>o.dlm>0);
+  const calFilters=["All",...new Set(calData.map(o=>o.t))];
+  let calType="All";
+  document.getElementById("cal-filters").innerHTML=calFilters.map(t=>`<button class="fb ${calType===t?"active":""}" id="cal-ft-${t}" onclick="calSetType('${t}')">${t}</button>`).join("");
+  window.calSetType=function(t){
+    calType=t;
+    document.querySelectorAll("[id^='cal-ft-']").forEach(b=>b.classList.toggle("active",b.id==="cal-ft-"+t));
+    renderCalGrid(months,MNAMES,calData,calType);
+  };
+  renderCalGrid(months,MNAMES,calData,calType);
+}
+function renderCalGrid(months,MNAMES,calData,calType){
+  document.getElementById("cal-grid").innerHTML=months.map(({y,m})=>{
+    const items=calData.filter(o=>o.dlm===m+1&&(calType==="All"||o.t===calType));
+    if(!items.length)return"";
+    const tc=TCOLOR;
+    return`<div class="cal-month">
+      <div class="cal-mhdr"><div class="cal-mname">${MNAMES[m]} ${y}</div><div class="cal-mcnt">${items.length} deadline${items.length!==1?"s":""}</div></div>
+      <div class="cal-items">
+        ${items.map(o=>`<div class="cal-item">
+          <div class="cal-iname">${o.n}</div>
+          <div class="cal-imeta">
+            <span class="cal-tag" style="color:${tc[o.t]||"#aaa"};background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07)">${o.t}</span>
+            <span class="cal-tag" style="color:${GRADE[o.g].c};background:${GRADE[o.g].bg};border:1px solid ${GRADE[o.g].br}">G${o.g}</span>
+            <span style="font-family:'JetBrains Mono',monospace;font-size:7.5px;color:var(--muted)">${o.dl}</span>
+          </div>
+        </div>`).join("")}
+      </div>
+    </div>`;
+  }).filter(Boolean).join("");
+}
+
+// SATURATION MAP
+function renderSat(){
+  const SAT_LABELS={1:"FRESH",2:"LOW",3:"MODERATE",4:"HIGH",5:"SATURATED"};
+  const SAT_WHY={
+    1:"Rare in observed pools — strong early-mover advantage.",
+    2:"Present in 5–15% of strong pools. Still differentiating.",
+    3:"Common enough to be expected. Outcome quality now matters more than just participation.",
+    4:"Very common in competitive pools. Need exceptional placement.",
+    5:"Near-universal in top applicant pools. Presence alone does not differentiate at Ivy/Oxbridge."
+  };
+  const bySat={};
+  DATA.forEach(o=>{if(!bySat[o.sat])bySat[o.sat]=[];bySat[o.sat].push(o);});
+  document.getElementById("sat-output").innerHTML=Object.keys(bySat).sort().map(s=>{
+    const cfg=SAT_CFG[parseInt(s)];
+    const items=bySat[s];
+    return`<div style="margin-bottom:26px">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;padding-bottom:7px;border-bottom:1px solid var(--border)">
+        <div style="font-size:18px;color:${cfg.c}">● ${SAT_LABELS[s]}</div>
+        <div style="font-size:11.5px;color:var(--muted);font-style:italic;flex:1">${SAT_WHY[s]}</div>
+        <div style="font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--muted)">${items.length} opportunities</div>
+      </div>
+      <div class="sat-grid">
+        ${items.map(o=>`<div class="sat-card">
+          <div class="sat-top">
+            <div class="sat-name">${o.n}</div>
+            <div class="gbadge" style="color:${GRADE[o.g].c};background:${GRADE[o.g].bg};border:1px solid ${GRADE[o.g].br};flex-shrink:0">G${o.g}</div>
+          </div>
+          <div style="font-family:'JetBrains Mono',monospace;font-size:8px;color:var(--muted)">${o.f}</div>
+          <div class="sat-why">${o.d.slice(0,95)}${o.d.length>95?"…":""}</div>
+        </div>`).join("")}
+      </div>
+    </div>`;
+  }).join("");
+}
+
+// INIT
+window.onload=function(){
+  renderDB();
+  initPB();
+  document.getElementById("pb-grade"); // ensure pb is ready
+};
+</script>
+</body>
+</html>
