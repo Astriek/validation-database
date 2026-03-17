@@ -475,18 +475,6 @@ const DATA = [
 
   {
     f: "Natural Sciences",
-    n: "KVPY — Kishore Vaigyanik Protsahan Yojana",
-    t: "Program",
-    g: 1, na: false, countries: ["IN"],
-    dl: "Sep application", dlm: 9,
-    sat: 1, ivy: 1, oxb: 2,
-    d: "India's most prestigious national science scholarship for basic sciences. Monthly stipend + summer research placement.",
-    url: "https://kvpy.iisc.ac.in",
-    note: "KVPY Fellow status is Summa-level for Indian science applicants. Universally recognised by US AOs familiar with India."
-  },
-
-  {
-    f: "Natural Sciences",
     n: "International Olympiad on Astronomy & Astrophysics (IOAA)",
     t: "Competition",
     g: 1, na: false, countries: ["ALL"],
@@ -1272,18 +1260,6 @@ const DATA = [
     sat: 2, ivy: 2, oxb: 2,
     d: "Becoming a licensed TEDx organiser and running your own event is substantially stronger than giving a talk.",
     url: "https://www.ted.com/tedx/organize"
-  },
-
-  {
-    f: "New Age & Cross-Field",
-    n: "Polygence / Lumiere → Peer-Reviewed Publication",
-    t: "Program",
-    g: 3, na: true, countries: ["ALL"],
-    dl: "Rolling", dlm: 0,
-    sat: 4, ivy: 3, oxb: 3,
-    d: "Mentored research platforms. The platform itself is now Grade 4. Value is entirely in the peer-reviewed published output.",
-    url: "https://www.polygence.org",
-    note: "Platform alone = Grade 4. Platform + JEI/domain journal publication = Grade 2."
   },
 
 ]; // ← END OF DATA ARRAY. Add new entries ABOVE this line.
